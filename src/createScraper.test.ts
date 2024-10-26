@@ -11,7 +11,22 @@ const schema = z.object({
   views: z.number(),
 });
 
+const schemaWithNested = z.object({
+  title: z.string().default('No title nested'),
+  image: z
+    .object({
+      url: z.string(),
+      width: z.number(),
+      height: z.number(),
+    })
+    .default({ url: '', width: 0, height: 0 })
+    .optional(),
+});
+
 type FieldDefinitions = SchemaFieldDefinitions<z.infer<typeof schema>>;
+type NestedFieldDefinitions = SchemaFieldDefinitions<
+  z.infer<typeof schemaWithNested>
+>;
 
 const fields: FieldDefinitions = {
   title: {
@@ -36,6 +51,30 @@ const fields: FieldDefinitions = {
   },
 };
 
+const nestedFields: NestedFieldDefinitions = {
+  title: {
+    selector: 'title',
+  },
+  image: {
+    fields: {
+      url: {
+        selector: 'meta[property="og:image"]',
+        attribute: 'content',
+      },
+      width: {
+        selector: 'meta[property="og:image:width"]',
+        attribute: 'content',
+        transform: (value) => parseInt(value, 10),
+      },
+      height: {
+        selector: 'meta[property="og:image:height"]',
+        attribute: 'content',
+        transform: (value) => parseInt(value, 10),
+      },
+    },
+  },
+};
+
 const html = `
 <!DOCTYPE html>
 <html>
@@ -44,6 +83,19 @@ const html = `
   <meta name="keywords" content="typescript,html,parsing">
   <meta name="views" content="1234">
   <title>Example Title</title>
+</head>
+<body></body>
+</html>
+`;
+
+const htmlWithNested = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Example Title</title>
+  <meta property="og:image" content="https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&amp;tight=false&amp;w=1372">
+  <meta property="og:image:width" content="1372">
+  <meta property="og:image:height" content="708">
 </head>
 <body></body>
 </html>
@@ -113,5 +165,23 @@ describe('xscrape', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
     }
+  });
+
+  test('extracts nested data from HTML', () => {
+    const validator = new ZodValidator(schemaWithNested);
+    const scraper = createScraper({
+      fields: nestedFields,
+      validator,
+    });
+    const data = scraper(htmlWithNested);
+
+    expect(data).toEqual({
+      title: 'Example Title',
+      image: {
+        url: 'https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&tight=false&w=1372',
+        width: 1372,
+        height: 708,
+      },
+    });
   });
 });
