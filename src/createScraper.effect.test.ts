@@ -1,31 +1,32 @@
-import { createScraper } from '@/createScraper.js';
 import { describe, test, expect } from 'vitest';
-import { z } from 'zod';
-import { ZodValidator } from '@/validators/zod.js';
+import * as S from 'effect/Schema';
+import { createScraper } from '@/createScraper.js';
+import { EffectValidator } from '@/validators/effect.js';
 import { type SchemaFieldDefinitions } from '@/types.js';
 
-const schema = z.object({
-  title: z.string().default('No title'),
-  description: z.string(),
-  keywords: z.array(z.string()),
-  views: z.number(),
+const Title = S.optional(S.String).pipe(
+  S.withDecodingDefault(() => 'No title'),
+);
+
+const schema = S.Struct({
+  title: Title,
+  description: S.String,
+  keywords: S.Array(S.String),
+  views: S.Number,
 });
 
-const schemaWithNested = z.object({
-  title: z.string().default('No title nested'),
-  image: z
-    .object({
-      url: z.string(),
-      width: z.number(),
-      height: z.number(),
-    })
-    .default({ url: '', width: 0, height: 0 })
-    .optional(),
+const schemaWithNested = S.Struct({
+  title: Title,
+  image: S.Struct({
+    url: S.String,
+    width: S.Number,
+    height: S.Number,
+  }),
 });
 
-type FieldDefinitions = SchemaFieldDefinitions<z.infer<typeof schema>>;
+type FieldDefinitions = SchemaFieldDefinitions<S.Schema.Type<typeof schema>>;
 type NestedFieldDefinitions = SchemaFieldDefinitions<
-  z.infer<typeof schemaWithNested>
+  S.Schema.Type<typeof schemaWithNested>
 >;
 
 const fields: FieldDefinitions = {
@@ -101,9 +102,9 @@ const htmlWithNested = `
 </html>
 `;
 
-describe('xscrape', () => {
+describe('xscrape with Effect/Schema', () => {
   test('extracts data from HTML', () => {
-    const validator = new ZodValidator(schema);
+    const validator = new EffectValidator(schema);
     const scraper = createScraper({
       fields,
       validator,
@@ -119,7 +120,7 @@ describe('xscrape', () => {
   });
 
   test('handles missing data', () => {
-    const validator = new ZodValidator(schema);
+    const validator = new EffectValidator(schema);
     const scraper = createScraper({
       fields,
       validator,
@@ -135,7 +136,7 @@ describe('xscrape', () => {
   });
 
   test('handles multiple values', () => {
-    const validator = new ZodValidator(schema);
+    const validator = new EffectValidator(schema);
     const scraper = createScraper({
       fields,
       validator,
@@ -153,7 +154,7 @@ describe('xscrape', () => {
   });
 
   test('handles invalid data', () => {
-    const validator = new ZodValidator(schema);
+    const validator = new EffectValidator(schema);
     const scraper = createScraper({
       fields,
       validator,
@@ -168,7 +169,7 @@ describe('xscrape', () => {
   });
 
   test('extracts nested data from HTML', () => {
-    const validator = new ZodValidator(schemaWithNested);
+    const validator = new EffectValidator(schemaWithNested);
     const scraper = createScraper({
       fields: nestedFields,
       validator,
