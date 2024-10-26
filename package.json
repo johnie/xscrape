@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0",
+    "effect": "^3.10.4",
     "zod": "^3.23.8"
   }
 }
