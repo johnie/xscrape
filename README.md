@@ -84,8 +84,7 @@ const fields: FieldDefinitions = {
 3. Create a Scraper and Extract Data
 
 ```ts
-import { createScraper } from 'xscrape';
-import { ZodValidator } from 'xscrape/validators/zod';
+import { createScraper, ZodValidator } from 'xscrape';
 
 const validator = new ZodValidator(schema);
 const scraper = createScraper({ fields, validator });
