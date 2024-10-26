@@ -9,6 +9,7 @@
             "require": "./dist/index.cjs"
         }
     },
+    "typings": "dist/index.d.ts",
     "files": [
         "dist"
     ],
@@ -21,7 +22,8 @@
         "format": "prettier --write ./src",
         "check-format": "prettier --check ./src",
         "check-exports": "attw --pack .",
-        "local-release": "npm run ci && changeset version && changeset publish"
+        "local-release": "npm run ci && changeset version && changeset publish",
+        "release": "npm run ci && changeset publish"
     },
     "keywords": [
         "web-scraping",
