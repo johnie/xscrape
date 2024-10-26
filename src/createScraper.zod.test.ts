@@ -101,7 +101,7 @@ const htmlWithNested = `
 </html>
 `;
 
-describe('xscrape', () => {
+describe('xscrape with Zod', () => {
   test('extracts data from HTML', () => {
     const validator = new ZodValidator(schema);
     const scraper = createScraper({
