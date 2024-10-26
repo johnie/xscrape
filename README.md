@@ -7,11 +7,13 @@ Effect Schema, allowing you to use your preferred validation tool.
 
 ## Features
 
-- HTML Parsing: Extract data from HTML using CSS selectors with the help of
+- **HTML Parsing**: Extract data from HTML using CSS selectors with the help of
   [cheerio](https://github.com/cheeriojs/cheerio).
-- Schema Validation: Validate and transform extracted data with schema validation libraries like [Zod](https://github.com/colinhacks/zod).
-- Custom Transformations: Provide custom transformations for extractedattributes.
-- Default Values: Define default values for missing data fields.
+- **Schema Validation**: Validate and transform extracted data with schema validation libraries like [Zod](https://github.com/colinhacks/zod).
+- **Custom Transformations**: Provide custom transformations for extractedattributes.
+- **Default Values**: Define default values for missing data fields.
+- **Nested Field Support**: Define and extract nested data structures from
+  HTML elements.
 
 ### Schema Support
 
@@ -48,6 +50,14 @@ const schema = z.object({
   description: z.string(),
   keywords: z.array(z.string()),
   views: z.number(),
+  image: z
+    .object({
+      url: z.string(),
+      width: z.number(),
+      height: z.number(),
+    })
+    .default({ url: '', width: 0, height: 0 })
+    .optional(),
 });
 ```
 
@@ -78,6 +88,25 @@ const fields: FieldDefinitions = {
     transform: (value) => parseInt(value, 10),
     defaultValue: 0,
   },
+  // Example of a nested field
+  image: {
+    fields: {
+      url: {
+        selector: 'meta[property="og:image"]',
+        attribute: 'content',
+      },
+      width: {
+        selector: 'meta[property="og:image:width"]',
+        attribute: 'content',
+        transform: (value) => parseInt(value, 10),
+      },
+      height: {
+        selector: 'meta[property="og:image:height"]',
+        attribute: 'content',
+        transform: (value) => parseInt(value, 10),
+      },
+    },
+  },
 };
 ```
 
@@ -96,6 +125,9 @@ const html = `
      <meta name="description" content="An example description.">
      <meta name="keywords" content="typescript,html,parsing">
      <meta name="views" content="1234">
+     <meta property="og:image" content="https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&amp;tight=false&amp;w=1372">
+     <meta property="og:image:width" content="1372">
+     <meta property="og:image:height" content="708">
      <title>Example Title</title>
    </head>
    <body></body>
@@ -111,6 +143,11 @@ console.log(data);
 // description: 'An example description.',
 // keywords: ['typescript', 'html', 'parsing'],
 // views: 1234
+// image: {
+//   url: 'https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&amp;tight=false&amp;w=1372',
+//   width: 1372,
+//   height: 708
+// }
 // }
 ```
 

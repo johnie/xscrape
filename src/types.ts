@@ -3,12 +3,18 @@ export type ScrapeConfig<T> = {
   validator: SchemaValidator<T>;
 };
 
-export type FieldDefinition<T> = {
-  selector: string;
-  attribute?: string;
-  transform?: (value: string) => T;
-  defaultValue?: T;
-  multiple?: boolean;
+export type FieldDefinition<T> =
+  | {
+      selector: string;
+      attribute?: string;
+      transform?: (value: string) => T;
+      defaultValue?: T;
+      multiple?: boolean;
+    }
+  | NestedFieldDefinition<T>;
+
+type NestedFieldDefinition<T> = {
+  fields: SchemaFieldDefinitions<T>;
 };
 
 export type SchemaFieldDefinitions<T> = {
