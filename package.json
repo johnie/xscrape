@@ -1,6 +1,6 @@
 {
     "name": "xscrape",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "A flexible and powerful library designed to extract and transform data from HTML documents using user-defined schemas",
     "main": "dist/index.js",
     "exports": {
@@ -9,6 +9,7 @@
             "require": "./dist/index.cjs"
         }
     },
+    "typings": "dist/index.d.ts",
     "files": [
         "dist"
     ],
@@ -21,7 +22,8 @@
         "format": "prettier --write ./src",
         "check-format": "prettier --check ./src",
         "check-exports": "attw --pack .",
-        "local-release": "npm run ci && changeset version && changeset publish"
+        "local-release": "npm run ci && changeset version && changeset publish",
+        "release": "npm run ci && changeset publish"
     },
     "keywords": [
         "web-scraping",
@@ -49,6 +51,7 @@
     "homepage": "https://github.com/johnie/xscrape#readme",
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.16.4",
+        "@changesets/changelog-github": "^0.5.0",
         "@changesets/cli": "^2.27.9",
         "prettier": "^3.3.3",
         "tsup": "^8.3.5",
