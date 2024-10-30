@@ -10,7 +10,7 @@ describe('xscrape with Effect/Schema', () => {
         S.Struct({
           title: S.String,
           description: S.String,
-          keywords: S.split(','),
+          keywords: S.Array(S.String),
           views: S.Number,
         }),
       extract: {
@@ -21,7 +21,7 @@ describe('xscrape with Effect/Schema', () => {
         },
         keywords: {
           selector: 'meta[name="keywords"]',
-          value: 'content',
+          value: (el) => el.attribs['content']?.split(',') || [],
         },
         views: {
           selector: 'meta[name="views"]',
