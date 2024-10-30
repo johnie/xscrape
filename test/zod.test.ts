@@ -2,47 +2,6 @@ import { describe, test, expect } from 'vitest';
 import { defineScraper } from '@/defineScraper.js';
 import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html.js';
 
-const fields = {
-  title: {
-    selector: 'title',
-  },
-  description: {
-    selector: 'meta[name="description"]',
-    attribute: 'content',
-    defaultValue: 'No description',
-  },
-  keywords: {
-    selector: 'meta[name="keywords"]',
-    attribute: 'content',
-  },
-  views: {
-    selector: 'meta[name="views"]',
-    attribute: 'content',
-  },
-};
-
-const nestedFields = {
-  title: {
-    selector: 'title',
-  },
-  image: {
-    fields: {
-      url: {
-        selector: 'meta[property="og:image"]',
-        attribute: 'content',
-      },
-      width: {
-        selector: 'meta[property="og:image:width"]',
-        attribute: 'content',
-      },
-      height: {
-        selector: 'meta[property="og:image:height"]',
-        attribute: 'content',
-      },
-    },
-  },
-};
-
 describe('xscrape with Zod', () => {
   test('extracts data from HTML', async () => {
     const scraper = defineScraper({
