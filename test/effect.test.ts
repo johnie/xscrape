@@ -10,8 +10,8 @@ describe('xscrape with Effect/Schema', () => {
         S.Struct({
           title: S.String,
           description: S.String,
-          keywords: S.mutable(S.Array(S.String)),
-          views: S.String,
+          keywords: S.split(','),
+          views: S.Number,
         }),
       extract: {
         title: 'title',
@@ -23,10 +23,10 @@ describe('xscrape with Effect/Schema', () => {
           selector: 'meta[name="keywords"]',
           value: 'content',
         },
-        // views: {
-        //   selector: 'meta[name="views"]',
-        //   value: 'content',
-        // },
+        views: {
+          selector: 'meta[name="views"]',
+          value: (el) => parseInt(el.attribs['content'] || '0', 10),
+        },
       },
     });
     const { data, error } = await scraper(kitchenSink);
