@@ -5,7 +5,6 @@ import type {
   ValidatorType,
 } from '@/types/main.js';
 import { z } from 'zod';
-import { Effect, Schema } from 'effect';
 
 class Validator<T> implements SchemaValidator<T> {
   constructor(
@@ -33,8 +32,6 @@ export function getSchemaBuilder<V extends ValidatorType>(
   switch (type) {
     case 'zod':
       return z as SchemaBuilder<V>;
-    case 'effect':
-      return Schema as SchemaBuilder<V>;
     default:
       throw new Error(`Unsupported validator type: ${type}`);
   }
@@ -52,11 +49,6 @@ export function createValidator<T, V extends ValidatorType>(
       return new Validator<T>(schema, (schema, data) =>
         (schema as z.ZodSchema<T>).parse(data),
       );
-    case 'effect':
-      return new Validator<T>(schema, (schema, data) => {
-        const result = Schema.decodeUnknown(schema as Schema.Schema<T>)(data);
-        return Effect.runSync(result);
-      });
     default:
       throw new Error(`Unsupported validator type: ${type}`);
   }
