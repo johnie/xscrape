@@ -1,25 +1,17 @@
 import { z } from 'zod';
-import { Schema } from 'effect';
 import type { ExtractMap } from './cheerio.js';
 
-export type ValidatorType = 'zod' | 'effect';
+export type ValidatorType = 'zod';
 
 type ZodBuilder = typeof z;
-type EffectBuilder = typeof Schema;
 
 export type SchemaBuilder<V extends ValidatorType> = V extends 'zod'
   ? ZodBuilder
-  : V extends 'effect'
-    ? EffectBuilder
-    : never;
+  : never;
 
 export type SchemaFunction<V extends ValidatorType, T> = (
   builder: SchemaBuilder<V>,
-) => V extends 'zod'
-  ? z.ZodSchema<T>
-  : V extends 'effect'
-    ? Schema.Schema<T>
-    : never;
+) => V extends 'zod' ? z.ZodSchema<T> : never;
 
 export type ScraperConfig<
   T extends Record<string, unknown>,
