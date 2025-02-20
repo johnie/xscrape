@@ -1,9 +1,6 @@
 # xscrape
 
-`xscrape` is a powerful and flexible library designed for extracting and
-transforming data from HTML documents using user-defined schemas. It integrates
-seamlessly with various schema validation libraries such as Zod, Yup, Joi, and
-Effect Schema, allowing you to use your preferred validation tool.
+`xscrape` is a powerful and flexible library designed for extracting and transforming data from HTML documents using user-defined schemas. 
 
 ## Features
 
@@ -20,9 +17,9 @@ Effect Schema, allowing you to use your preferred validation tool.
 | Schema Library                                       | Status              | Notes                                                         |
 | ---------------------------------------------------- | ------------------- | ------------------------------------------------------------- |
 | [Zod](https://github.com/colinhacks/zod)             | ✅ Supported        | Default schema tool for `xscrape`                             |
-| [Effect/Schema](https://github.com/Effect-TS/effect) | ✅ Supported        | Support for Effect/Schema for additional flexibility          |
-| [Joi](https://github.com/sideway/joi)                | ✅ Supported        | Support for Joi for validation                                |
-| [Yup](https://github.com/jquense/yup)                | ✅ Supported        | Support for Yup for validation                                |
+| [Effect/Schema](https://github.com/Effect-TS/effect) | 🔄 In Consideration        | Support for Effect/Schema for additional flexibility          |
+| [Joi](https://github.com/sideway/joi)                | 🔄 In Consideration        | Support for Joi for validation                                |
+| [Yup](https://github.com/jquense/yup)                | 🔄 In Consideration        | Support for Yup for validation                                |
 | Others...                                            | 🔄 In Consideration | Potential support for other schema tools as per user feedback |
 
 ## Installation
