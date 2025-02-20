@@ -1,3 +1,2 @@
-export * from '@/createScraper.js';
-export * from '@/validators/index.js';
-export * from '@/types.js';
+export * from '@/defineScraper.js';
+export * from '@/types/main.js';
