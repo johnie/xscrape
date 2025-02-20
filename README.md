@@ -34,134 +34,140 @@ npm install xscrape
 
 ## Usage
 
-Below is an example of how to use xscrape for extracting and transforming data
-from an HTML document:
-
-1. Define Your Schema
+Below is an example of how to use xscrape for extracting and transforming data from an HTML document:
 
 ```ts
-import { z } from 'zod';
+import { defineScraper } from 'xscrape';
 
-const schema = z.object({
-  title: z.string().default('No title'),
-  description: z.string(),
-  keywords: z.array(z.string()),
-  views: z.number(),
-  image: z
-    .object({
-      url: z.string(),
-      width: z.number(),
-      height: z.number(),
-    })
-    .default({ url: '', width: 0, height: 0 })
-    .optional(),
-});
-```
-
-2. Define Field Definitions
-
-```ts
-import { type SchemaFieldDefinitions } from 'xscrape';
-
-type FieldDefinitions = SchemaFieldDefinitions<z.infer<typeof schema>>;
-
-const fields: FieldDefinitions = {
-  title: { selector: 'title' },
-  description: {
-    selector: 'meta[name="description"]',
-    attribute: 'content',
-
-    defaultValue: 'No description',
-  },
-  keywords: {
-    selector: 'meta[name="keywords"]',
-    attribute: 'content',
-    transform: (value) => value.split(','),
-    defaultValue: [],
-  },
-  views: {
-    selector: 'meta[name="views"]',
-    attribute: 'content',
-    transform: (value) => parseInt(value, 10),
-    defaultValue: 0,
-  },
-  // Example of a nested field
-  image: {
-    fields: {
-      url: {
-        selector: 'meta[property="og:image"]',
-        attribute: 'content',
-      },
-      width: {
-        selector: 'meta[property="og:image:width"]',
-        attribute: 'content',
-        transform: (value) => parseInt(value, 10),
-      },
-      height: {
-        selector: 'meta[property="og:image:height"]',
-        attribute: 'content',
-        transform: (value) => parseInt(value, 10),
+const scraper = defineScraper({
+  validator: 'zod',
+  schema: (z) => z.object({
+    title: z.string(),
+    description: z.string(),
+    keywords: z.array(z.string()),
+    views: z.coerce.number(),
+  }),
+  extract: {
+    title: {
+      selector: 'title',
+    },
+    description: {
+      selector: 'meta[name="description"]',
+      value: 'content',
+    },
+    keywords: {
+      selector: 'meta[name="keywords"]',
+      value(el) {
+        return el.attribs['content']?.split(',');
       },
     },
+    views: {
+      selector: 'meta[name="views"]',
+      value: 'content',
+    },
   },
-};
-```
-
-3. Create a Scraper and Extract Data
-
-```ts
-import { createScraper, ZodValidator } from 'xscrape';
-
-const validator = new ZodValidator(schema);
-const scraper = createScraper({ fields, validator });
+});
 
 const html = `
-   <!DOCTYPE html>
-   <html>
-   <head>
-     <meta name="description" content="An example description.">
-     <meta name="keywords" content="typescript,html,parsing">
-     <meta name="views" content="1234">
-     <meta property="og:image" content="https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&amp;tight=false&amp;w=1372">
-     <meta property="og:image:width" content="1372">
-     <meta property="og:image:height" content="708">
-     <title>Example Title</title>
-   </head>
-   <body></body>
-   </html>
-   `;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="description" content="An example description.">
+  <meta name="keywords" content="typescript,html,parsing">
+  <meta name="views" content="1234">
+  <title>Example Title</title>
+</head>
+<body></body>
+</html>
+`;
 
-const data = scraper(html);
+const { data, error } = await scraper(html);
 console.log(data);
 
 // Outputs:
 // {
-// title: 'Example Title',
-// description: 'An example description.',
-// keywords: ['typescript', 'html', 'parsing'],
-// views: 1234
-// image: {
-//   url: 'https://example.se/images/c12ffe73-3227-4a4a-b8ad-a3003cdf1d70?h=708&amp;tight=false&amp;w=1372',
-//   width: 1372,
-//   height: 708
+//   title: 'Example Title',
+//   description: 'An example description.',
+//   keywords: ['typescript', 'html', 'parsing'],
+//   views: 1234
 // }
-// }
+```
+
+### Handling Missing Data
+
+xscrape supports default values through Zod's schema definitions:
+
+```ts
+const scraper = defineScraper({
+  validator: 'zod',
+  schema: (z) => z.object({
+    title: z.string().default('No title'),
+    description: z.string().default('No description'),
+    views: z.coerce.number().default(0),
+  }),
+  extract: {
+    title: {
+      selector: 'title',
+    },
+    description: {
+      selector: 'meta[name="description"]',
+      value: 'content',
+    },
+    views: {
+      selector: 'meta[name="views"]',
+      value: 'content',
+    },
+  },
+});
+```
+
+### Nested Fields
+
+xscrape supports extracting nested data structures:
+
+```ts
+const scraper = defineScraper({
+  validator: 'zod',
+  schema: (z) => z.object({
+    title: z.string(),
+    image: z.object({
+      url: z.string().url(),
+      width: z.coerce.number(),
+      height: z.coerce.number(),
+    }).default({ url: '', width: 0, height: 0 }).optional(),
+  }),
+  extract: {
+    title: {
+      selector: 'title',
+    },
+    image: {
+      selector: 'head',
+      value: {
+        url: {
+          selector: 'meta[property="og:image"]',
+          value: 'content',
+        },
+        width: {
+          selector: 'meta[property="og:image:width"]',
+          value: 'content',
+        },
+        height: {
+          selector: 'meta[property="og:image:height"]',
+          value: 'content',
+        },
+      },
+    },
+  },
+});
 ```
 
 ## Configuration
 
-xscrape offers a range of configuration options through the types provided,
-allowing for detailed customization and robust data extraction and validation:
+xscrape offers a range of configuration options through the types provided, allowing for detailed customization and robust data extraction and validation:
 
-- `SchemaFieldDefinitions`: Determines how fields are extracted from the HTML.
-- `SchemaValidator`: Validates the extracted data according to defined schemas.
-
-## API Reference
-
-- `createScraper(config: ScrapeConfig): (html: string) => T` Creates a scraping function based on the specified fields and validator.
-- `ZodValidator` A built-in validator using Zod, allowing you to define schemas andvalidate data effortlessly.
-
-For a complete list of API methods and more advanced configuration options,refer to the documentation on the project homepage https://github.com/johnie/xscrape.
+- `schema`: Defines the shape and validation rules for the extracted data
+- `extract`: Determines how fields are extracted from the HTML
+- `validator`: Specifies the validation library to use (currently supports 'zod')
 
 ## Contributing
 
