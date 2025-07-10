@@ -1,51 +1,32 @@
 import * as cheerio from 'cheerio';
-import { createValidator } from '@/validators.js';
-import type {
-  ScraperConfig,
-  ScraperResult,
-  ValidatorType,
-} from '@/types/main.js';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { ScraperConfig, ScraperResult } from '@/types/main';
 
-/**
- * Defines a scraper with the provided configuration.
- *
- * @template T - The shape of the extracted data.
- * @template V - The type of the validator used for validation.
- * @template R - The type of the result after optional transformation, defaults to T.
- *
- * @param config - The configuration object for the scraper.
- * @returns A function that takes an HTML string and returns the scraping result, which could be
- * a scraper result or a promise of a scraper result.
- */
 export function defineScraper<
   T extends Record<string, unknown>,
-  V extends ValidatorType,
-  R extends T = T,
->(config: ScraperConfig<T, V, R>): (html: string) => Promise<ScraperResult<R>> {
-  const validator = createValidator(config.validator, config.schema);
-
-  return async (html: string): Promise<ScraperResult<R>> => {
+  S extends StandardSchemaV1<any, T>,
+>(
+  config: ScraperConfig<T, S>,
+): (html: string) => Promise<ScraperResult<StandardSchemaV1.InferOutput<S>>> {
+  return async (
+    html: string,
+  ): Promise<ScraperResult<StandardSchemaV1.InferOutput<S>>> => {
     try {
       const $ = cheerio.load(html);
       const extractedData = $.extract(config.extract);
 
-      const validationResult = validator.validate(extractedData);
+      const validationResult = await Promise.resolve(
+        config.schema['~standard'].validate(extractedData),
+      );
 
-      if (!validationResult.success) {
-        return { error: validationResult.error };
+      if (validationResult.issues) {
+        return { error: validationResult.issues };
       }
 
-      if (!validationResult.data) {
-        return {
-          error: new Error('Validation succeeded but no data was returned'),
-        };
-      }
-
-      // Apply optional transformation
       if (config.transform) {
         try {
           const transformed = await Promise.resolve(
-            config.transform(validationResult.data),
+            config.transform(validationResult.value),
           );
           return { data: transformed };
         } catch (error) {
@@ -53,7 +34,7 @@ export function defineScraper<
         }
       }
 
-      return { data: validationResult.data as R };
+      return { data: validationResult.value };
     } catch (error) {
       return { error };
     }
