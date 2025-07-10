@@ -1,30 +1,20 @@
 # xscrape
 
-`xscrape` is a powerful and flexible library designed for extracting and transforming data from HTML documents using user-defined schemas. 
+`xscrape` is a powerful and flexible library designed for extracting and transforming data from HTML documents using user-defined schemas. It now supports any validation library that implements the **Standard Schema**, allowing you to bring your own schema for robust, type-safe data validation.
 
 ## Features
 
-- **HTML Parsing**: Extract data from HTML using CSS selectors with the help of
-  [cheerio](https://github.com/cheeriojs/cheerio).
-- **Schema Validation**: Validate and transform extracted data with schema validation libraries like [Zod](https://github.com/colinhacks/zod).
-- **Custom Transformations**: Provide custom transformations for extractedattributes.
-- **Default Values**: Define default values for missing data fields.
-- **Nested Field Support**: Define and extract nested data structures from
-  HTML elements.
+  * **HTML Parsing**: Extract data from HTML using CSS selectors with the help of [cheerio](https://github.com/cheeriojs/cheerio).
+  * **Flexible Schema Validation**: Validate and transform extracted data with any validation library that implements the [Standard Schema](https://standardschema.dev), such as Zod, Valibot, ArkType, and Effect Schema.
+  * **Custom Transformations**: Provide custom transformations for extracted attributes.
+  * **Default Values**: Define default values for missing data fields through your chosen schema library's features.
+  * **Nested Field Support**: Define and extract nested data structures from HTML elements.
 
-### Schema Support
-
-| Schema Library                                       | Status              | Notes                                                         |
-| ---------------------------------------------------- | ------------------- | ------------------------------------------------------------- |
-| [Zod](https://github.com/colinhacks/zod)             | ✅ Supported        | Default schema tool for `xscrape`                             |
-| [Effect/Schema](https://github.com/Effect-TS/effect) | 🔄 In Consideration        | Support for Effect/Schema for additional flexibility          |
-| [Joi](https://github.com/sideway/joi)                | 🔄 In Consideration        | Support for Joi for validation                                |
-| [Yup](https://github.com/jquense/yup)                | 🔄 In Consideration        | Support for Yup for validation                                |
-| Others...                                            | 🔄 In Consideration | Potential support for other schema tools as per user feedback |
+-----
 
 ## Installation
 
-To install this library, use npm or yarn:
+To install this library, use your preferred package manager:
 
 ```bash
 pnpm add xscrape
@@ -32,16 +22,26 @@ pnpm add xscrape
 npm install xscrape
 ```
 
+You will also need to install your chosen schema validation library, for example, Zod:
+
+```bash
+pnpm add zod
+# or
+npm install zod
+```
+
+-----
+
 ## Usage
 
-Below is an example of how to use xscrape for extracting and transforming data from an HTML document:
+Below is an example of how to use `xscrape` with a Zod schema to extract and transform data from an HTML document.
 
 ```ts
 import { defineScraper } from 'xscrape';
+import { z } from 'zod';
 
 const scraper = defineScraper({
-  validator: 'zod',
-  schema: (z) => z.object({
+  schema: z.object({
     title: z.string(),
     description: z.string(),
     keywords: z.array(z.string()),
@@ -95,12 +95,14 @@ console.log(data);
 
 ### Handling Missing Data
 
-xscrape supports default values through Zod's schema definitions:
+You can handle missing data by using the features of your chosen schema library, such as default values in Zod.
 
 ```ts
+import { defineScraper } from 'xscrape';
+import { z } from 'zod';
+
 const scraper = defineScraper({
-  validator: 'zod',
-  schema: (z) => z.object({
+  schema: z.object({
     title: z.string().default('No title'),
     description: z.string().default('No description'),
     views: z.coerce.number().default(0),
@@ -123,12 +125,14 @@ const scraper = defineScraper({
 
 ### Nested Fields
 
-xscrape supports extracting nested data structures:
+`xscrape` also supports extracting nested data structures.
 
 ```ts
+import { defineScraper } from 'xscrape';
+import { z } from 'zod';
+
 const scraper = defineScraper({
-  validator: 'zod',
-  schema: (z) => z.object({
+  schema: z.object({
     title: z.string(),
     image: z.object({
       url: z.string().url(),
@@ -161,19 +165,22 @@ const scraper = defineScraper({
 });
 ```
 
+-----
+
 ## Configuration
 
-xscrape offers a range of configuration options through the types provided, allowing for detailed customization and robust data extraction and validation:
+The `defineScraper` function accepts a configuration object with the following properties:
 
-- `schema`: Defines the shape and validation rules for the extracted data
-- `extract`: Determines how fields are extracted from the HTML
-- `validator`: Specifies the validation library to use (currently supports 'zod')
+  * **`schema`**: A schema object from any library that implements the [Standard Schema](https://standardschema.dev) interface. This schema defines the shape and validation rules for the extracted data.
+  * **`extract`**: An object that determines how fields are extracted from the HTML using CSS selectors.
+  * **`transform`** (optional): A function to apply custom transformations to the validated data.
+
+-----
 
 ## Contributing
 
-Contributions are welcome! Please see the Contributing Guide https://github.com/johnie/xscrape/blob/main/CONTRIBUTING.md for more information.
+Contributions are welcome\! Please see the [Contributing Guide](https://github.com/johnie/xscrape/blob/main/CONTRIBUTING.md) for more information.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE
-https://github.com/johnie/xscrape/blob/main/LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/johnie/xscrape/blob/main/LICENSE) file for details.
