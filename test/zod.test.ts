@@ -1,18 +1,17 @@
 import { describe, test, expect } from 'vitest';
-import { defineScraper } from '@/defineScraper.js';
-import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html.js';
+import { defineScraper } from '@/defineScraper';
+import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
+import z from 'zod/v4';
 
 describe('xscrape with Zod', () => {
   test('extracts data from HTML', async () => {
     const scraper = defineScraper({
-      validator: 'zod',
-      schema: (z) =>
-        z.object({
-          title: z.string(),
-          description: z.string(),
-          keywords: z.array(z.string()),
-          views: z.coerce.number(),
-        }),
+      schema: z.object({
+        title: z.string(),
+        description: z.string(),
+        keywords: z.array(z.string()),
+        views: z.coerce.number(),
+      }),
       extract: {
         title: {
           selector: 'title',
@@ -47,13 +46,11 @@ describe('xscrape with Zod', () => {
 
   test('handles missing data', async () => {
     const scraper = defineScraper({
-      validator: 'zod',
-      schema: (z) =>
-        z.object({
-          title: z.string().default('No title'),
-          description: z.string().default('No description'),
-          views: z.coerce.number().default(0),
-        }),
+      schema: z.object({
+        title: z.string().default('No title'),
+        description: z.string().default('No description'),
+        views: z.coerce.number().default(0),
+      }),
       extract: {
         title: {
           selector: 'title',
@@ -85,11 +82,9 @@ describe('xscrape with Zod', () => {
 
   test('handles multiple values', async () => {
     const scraper = defineScraper({
-      validator: 'zod',
-      schema: (z) =>
-        z.object({
-          keywords: z.array(z.string()),
-        }),
+      schema: z.object({
+        keywords: z.array(z.string()),
+      }),
       extract: {
         keywords: {
           selector: 'meta[name="keywords"]',
@@ -112,14 +107,12 @@ describe('xscrape with Zod', () => {
 
   test('handles invalid data', async () => {
     const scraper = defineScraper({
-      validator: 'zod',
-      schema: (z) =>
-        z.object({
-          title: z.string(),
-          description: z.string(),
-          keywords: z.array(z.string()),
-          views: z.coerce.number(),
-        }),
+      schema: z.object({
+        title: z.string(),
+        description: z.string(),
+        keywords: z.array(z.string()),
+        views: z.coerce.number(),
+      }),
       extract: {
         title: {
           selector: 'title',
@@ -151,19 +144,17 @@ describe('xscrape with Zod', () => {
 
   test('extracts nested data from HTML', async () => {
     const scraper = defineScraper({
-      validator: 'zod',
-      schema: (z) =>
-        z.object({
-          title: z.string(),
-          image: z
-            .object({
-              url: z.string().url(),
-              width: z.coerce.number(),
-              height: z.coerce.number(),
-            })
-            .default({ url: '', width: 0, height: 0 })
-            .optional(),
-        }),
+      schema: z.object({
+        title: z.string(),
+        image: z
+          .object({
+            url: z.string().url(),
+            width: z.coerce.number(),
+            height: z.coerce.number(),
+          })
+          .default({ url: '', width: 0, height: 0 })
+          .optional(),
+      }),
       extract: {
         title: {
           selector: 'title',
