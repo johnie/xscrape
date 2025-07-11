@@ -4,7 +4,8 @@ import type { ScraperConfig, ScraperResult } from '@/types/main';
 
 export function defineScraper<
   S extends StandardSchemaV1,
-  R extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
+  T extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
+  R extends T = T,
 >(config: ScraperConfig<S, R>): (html: string) => Promise<ScraperResult<R>> {
   return async (html: string): Promise<ScraperResult<R>> => {
     try {
