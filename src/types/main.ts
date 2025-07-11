@@ -1,8 +1,8 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { ExtractMap, ExtractedMap } from './cheerio.js';
+import type { ExtractMap } from './cheerio.js';
 
 export type ScraperConfig<
-  S extends StandardSchemaV1<any, any>,
+  S extends StandardSchemaV1,
   R extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
 > = {
   schema: S;

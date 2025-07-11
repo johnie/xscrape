@@ -1,0 +1,5 @@
+---
+"xscrape": patch
+---
+
+fix linting

@@ -1,5 +1,5 @@
-import * as cheerio from 'cheerio';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import * as cheerio from 'cheerio';
 import type { ScraperConfig, ScraperResult } from '@/types/main';
 
 export function defineScraper<
