@@ -3,14 +3,10 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { ScraperConfig, ScraperResult } from '@/types/main';
 
 export function defineScraper<
-  T extends Record<string, unknown>,
-  S extends StandardSchemaV1<any, T>,
->(
-  config: ScraperConfig<T, S>,
-): (html: string) => Promise<ScraperResult<StandardSchemaV1.InferOutput<S>>> {
-  return async (
-    html: string,
-  ): Promise<ScraperResult<StandardSchemaV1.InferOutput<S>>> => {
+  S extends StandardSchemaV1,
+  R extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
+>(config: ScraperConfig<S, R>): (html: string) => Promise<ScraperResult<R>> {
+  return async (html: string): Promise<ScraperResult<R>> => {
     try {
       const $ = cheerio.load(html);
       const extractedData = $.extract(config.extract);
@@ -21,6 +17,14 @@ export function defineScraper<
 
       if (validationResult.issues) {
         return { error: validationResult.issues };
+      }
+
+      if (!('value' in validationResult)) {
+        return {
+          error: new Error(
+            'xscrape: Validation succeeded but no data was returned',
+          ),
+        };
       }
 
       if (config.transform) {
@@ -34,7 +38,7 @@ export function defineScraper<
         }
       }
 
-      return { data: validationResult.value };
+      return { data: validationResult.value as R };
     } catch (error) {
       return { error };
     }
