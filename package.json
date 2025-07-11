@@ -10,9 +10,7 @@
         }
     },
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist"],
     "type": "module",
     "scripts": {
         "build": "tsup",
@@ -38,7 +36,8 @@
         "zod",
         "valibot",
         "arktype",
-        "effect-schema"
+        "effect-schema",
+        "standard-schema"
     ],
     "author": "Johnie Hjelm <johnie@hjelm.im>",
     "license": "MIT",
