@@ -1,7 +1,11 @@
-import { describe, test, expect } from 'vitest';
-import { defineScraper } from '@/defineScraper';
-import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
+import { describe, expect, test } from 'vitest';
 import z from 'zod';
+import { defineScraper } from '@/defineScraper';
+import {
+  kitchenSink,
+  kitchenSinkWithLinks,
+  kitchenSinkWithNested,
+} from './__fixtures__/html';
 
 describe('xscrape with Zod', () => {
   test('extracts data from HTML', async () => {
@@ -185,6 +189,33 @@ describe('xscrape with Zod', () => {
         width: 1372,
         height: 708,
       },
+    });
+  });
+
+  test('extracts links from HTML', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        links: z.array(z.string()),
+      }),
+      extract: {
+        links: [
+          {
+            selector: 'a',
+            value: 'href',
+          },
+        ],
+      },
+    });
+    const { data, error } = await scraper(kitchenSinkWithLinks);
+
+    expect(error).toBeUndefined();
+
+    expect(data).toEqual({
+      links: [
+        'https://example.com',
+        '#internal-link',
+        'mailto:example@example.com',
+      ],
     });
   });
 });
