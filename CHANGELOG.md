@@ -1,5 +1,11 @@
 # xscrape
 
+## 3.0.1
+
+### Patch Changes
+
+- [#14](https://github.com/johnie/xscrape/pull/14) [`653fecf`](https://github.com/johnie/xscrape/commit/653fecf6b80097bc348c3cc31c2d97cd368e2715) Thanks [@johnie](https://github.com/johnie)! - fix linting
+
 ## 3.0.0
 
 ### Major Changes
