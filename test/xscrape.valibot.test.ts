@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'vitest';
-import { defineScraper } from '@/defineScraper';
 import * as v from 'valibot';
+import { describe, expect, test } from 'vitest';
+import { defineScraper } from '@/defineScraper';
 import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
 
 describe('xscrape with Valibot', () => {
@@ -65,6 +65,12 @@ describe('xscrape with Valibot', () => {
         description: {
           selector: 'meta[name="description"]',
           value: 'content',
+        },
+        keywords: {
+          selector: 'meta[name="keywords"]',
+          value(el) {
+            return el.attribs['content']?.split(',') || [];
+          },
         },
         views: {
           selector: 'meta[name="views"]',
