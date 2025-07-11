@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { defineScraper } from '@/defineScraper';
 import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
-import z from 'zod/v4';
+import z from 'zod';
 
 describe('xscrape with Zod', () => {
   test('extracts data from HTML', async () => {
@@ -68,8 +68,6 @@ describe('xscrape with Zod', () => {
     const { data, error } = await scraper(
       '<html><head></head><body></body></html>',
     );
-
-    console.log(error);
 
     expect(error).toBeUndefined();
 
