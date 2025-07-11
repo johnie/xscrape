@@ -20,8 +20,8 @@
         "lint": "tsc",
         "test": "vitest run",
         "test:watch": "vitest",
-        "format": "prettier --write ./src",
-        "check-format": "prettier --check ./src",
+        "format": "biome format --write ./src",
+        "check-format": "biome check ./src",
         "check-exports": "attw --pack .",
         "local-release": "npm run ci && changeset version && changeset publish",
         "release": "npm run ci && changeset publish"
@@ -36,8 +36,8 @@
         "crawler",
         "scraper",
         "zod",
-        "yup",
-        "joi",
+        "valibot",
+        "arktype",
         "effect-schema"
     ],
     "author": "Johnie Hjelm <johnie@hjelm.im>",
