@@ -1,6 +1,21 @@
-# xscrape
+<p align="center">
 
-`xscrape` is a powerful and flexible library designed for extracting and transforming data from HTML documents using user-defined schemas. It now supports any validation library that implements the **Standard Schema**, allowing you to bring your own schema for robust, type-safe data validation.
+  <h1 align="center">🕷️<br/><code>xscrape</code></h1>
+  <p align="center">Extract and transform HTML with your own schema, powered by <code>Standard Schema</code> compatibility.
+    <br/>
+    by <a href="https://github.com/johnie">@johnie</a>
+  </p>
+</p>
+<br/>
+
+<p align="center">
+<a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/johnie/xscrape" alt="License"></a>
+<a href="https://www.npmjs.com/package/xscrape" rel="nofollow"><img src="https://img.shields.io/npm/v/xscrape.svg" alt="npm"></a>
+<a href="https://github.com/johnie/xscrape" rel="nofollow"><img src="https://img.shields.io/github/stars/johnie/xscrape" alt="stars"></a>
+</p>
+
+<br/>
+<br/>
 
 ## Features
 
