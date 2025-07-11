@@ -10,9 +10,7 @@
         }
     },
     "typings": "dist/index.d.ts",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist"],
     "type": "module",
     "scripts": {
         "build": "tsup",
@@ -24,7 +22,10 @@
         "check-format": "biome check ./src",
         "check-exports": "attw --pack .",
         "local-release": "npm run ci && changeset version && changeset publish",
-        "release": "npm run ci && changeset publish"
+        "release": "npm run ci && changeset publish",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs"
     },
     "keywords": [
         "web-scraping",
@@ -64,6 +65,7 @@
         "typescript": "^5.8.3",
         "valibot": "^1.1.0",
         "vite": "^7.0.4",
+        "vitepress": "^1.6.3",
         "vitest": "^3.2.4",
         "zod": "^4.0.2"
     },
