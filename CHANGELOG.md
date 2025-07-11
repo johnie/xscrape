@@ -1,5 +1,11 @@
 # xscrape
 
+## 3.0.0
+
+### Major Changes
+
+- [#12](https://github.com/johnie/xscrape/pull/12) [`3fbca90`](https://github.com/johnie/xscrape/commit/3fbca90522aae6ef302150a2679aa973e36114fd) Thanks [@johnie](https://github.com/johnie)! - Refactor to use standard schema as validation standard.
+
 ## 1.3.1
 
 ### Patch Changes
