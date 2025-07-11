@@ -1,5 +1,13 @@
 # xscrape
 
+## 3.0.2
+
+### Patch Changes
+
+- [#18](https://github.com/johnie/xscrape/pull/18) [`d6231c0`](https://github.com/johnie/xscrape/commit/d6231c0ebb31c7e8be310dd23a7085a148047112) Thanks [@johnie](https://github.com/johnie)! - Fix bug where schema didn't affect extract method.
+
+- [#16](https://github.com/johnie/xscrape/pull/16) [`783f96d`](https://github.com/johnie/xscrape/commit/783f96df457f685bc77f79d52af0f0dc663c662c) Thanks [@johnie](https://github.com/johnie)! - Fix array items in `extract` function.
+
 ## 3.0.1
 
 ### Patch Changes
