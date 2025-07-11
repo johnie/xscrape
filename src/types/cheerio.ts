@@ -1,6 +1,4 @@
-// typed-extract.ts
-import type { Cheerio } from 'cheerio';
-import type { AnyNode, Element } from 'domhandler';
+import type { Element } from 'domhandler';
 
 // Re-define the types you need
 type ExtractDescriptorFn = (
