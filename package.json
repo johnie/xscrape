@@ -58,7 +58,6 @@
         "arktype": "^2.1.20",
         "effect": "^3.16.12",
         "jsdom": "^26.1.0",
-        "prettier": "^3.6.2",
         "tsup": "^8.5.0",
         "typescript": "^5.8.3",
         "valibot": "^1.1.0",
