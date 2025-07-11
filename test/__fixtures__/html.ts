@@ -224,3 +224,18 @@ export const largeKitchenSink = `
 </body>
 </html>
 `;
+
+export const kitchenSinkWithLinks = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kitchen Sink with Links</title>
+  <meta name="description" content="A kitchen sink example with various HTML elements including links.">
+</head>
+<body>
+<a href="https://example.com" target="_blank" rel="noopener noreferrer">External Link</a>
+<a href="#internal-link">Internal Link</a>
+<a href="mailto:example@example.com">Email Us</a>
+</body>
+</html>
+`;
