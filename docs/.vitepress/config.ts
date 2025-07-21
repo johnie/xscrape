@@ -1,29 +1,50 @@
 import { defineConfig } from 'vitepress';
 
-// https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'xscrape',
   description:
-    'Extract and transform HTML with your own schema, powered by Standard Schema compatibility',
+    'Extract and transform HTML with your own schema, powered by Standard Schema',
+  base: '/', // adjust if hosting under subpath
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+    logo: '/logo.svg', // add your logo in docs/public
+    siteTitle: 'xscrape',
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: 'Guide', link: '/quick-start' },
+      { text: 'API', link: '/api/defineScraper' },
+      { text: 'Examples', link: '/examples' },
+      { text: 'GitHub', link: 'https://github.com/johnie/xscrape' },
     ],
-
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Introduction',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' },
+          { text: 'Overview', link: '/' },
+          { text: 'Installation', link: '/installation' },
+          { text: 'Quick Start', link: '/quick-start' },
         ],
       },
-    ],
-
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      {
+        text: 'Guide',
+        items: [
+          { text: 'Basic Extraction', link: '/guide/basic-extraction' },
+          { text: 'Handling Missing Data', link: '/guide/missing-data' },
+          { text: 'Extracting Arrays', link: '/guide/arrays' },
+          { text: 'Nested Objects', link: '/guide/nested-objects' },
+          { text: 'Custom Transform', link: '/guide/custom-transform' },
+        ],
+      },
+      {
+        text: 'API Reference',
+        items: [
+          { text: 'defineScraper()', link: '/api/defineScraper' },
+          { text: 'Extract Config', link: '/api/extract-config' },
+          { text: 'Types', link: '/api/types' },
+        ],
+      },
+      {
+        text: 'Examples',
+        items: [{ text: 'Combined Examples', link: '/examples' }],
+      },
     ],
   },
 });
