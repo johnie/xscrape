@@ -29,14 +29,10 @@ export function defineScraper<
       }
 
       if (config.transform) {
-        try {
-          const transformed = await Promise.resolve(
-            config.transform(validationResult.value),
-          );
-          return { data: transformed };
-        } catch (error) {
-          return { error };
-        }
+        const transformed = await Promise.resolve(
+          config.transform(validationResult.value),
+        );
+        return { data: transformed };
       }
 
       return { data: validationResult.value as R };
