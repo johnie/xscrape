@@ -1,5 +1,11 @@
 # xscrape
 
+## 3.0.3
+
+### Patch Changes
+
+- [#21](https://github.com/johnie/xscrape/pull/21) [`7130963`](https://github.com/johnie/xscrape/commit/713096321fe0885dc9f747975804ac4b895580e0) Thanks [@johnie](https://github.com/johnie)! - Minor tweaks
+
 ## 3.0.2
 
 ### Patch Changes
