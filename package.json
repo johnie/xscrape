@@ -10,19 +10,21 @@
         }
     },
     "typings": "dist/index.d.ts",
-    "files": ["dist"],
+    "files": [
+        "dist"
+    ],
     "type": "module",
     "scripts": {
         "build": "tsup",
-        "ci": "$npm_execpath run build && $npm_execpath run check-format && $npm_execpath run check-exports && $npm_execpath run lint && $npm_execpath run test",
-        "lint": "tsc",
+        "ci": "pnpm run build && pnpm run lint && pnpm run typecheck && pnpm run check-exports && pnpm run test",
+        "typecheck": "tsc",
         "test": "vitest run",
         "test:watch": "vitest",
         "format": "biome format --write ./src",
-        "check-format": "biome check ./src",
+        "lint": "biome check ./src",
         "check-exports": "attw --pack .",
-        "local-release": "$npm_execpath run ci && changeset version && changeset publish",
-        "release": "$npm_execpath run ci && changeset publish",
+        "local-release": "pnpm run ci && changeset version && changeset publish",
+        "release": "pnpm run ci && changeset publish",
         "docs:dev": "vitepress dev docs",
         "docs:build": "vitepress build docs",
         "docs:preview": "vitepress preview docs"
