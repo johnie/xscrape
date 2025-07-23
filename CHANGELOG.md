@@ -1,5 +1,11 @@
 # xscrape
 
+## 3.0.4
+
+### Patch Changes
+
+- [#24](https://github.com/johnie/xscrape/pull/24) [`c6490ad`](https://github.com/johnie/xscrape/commit/c6490addca09fb23a0405d9aa978112868c022d6) Thanks [@johnie](https://github.com/johnie)! - audit fixes
+
 ## 3.0.3
 
 ### Patch Changes
