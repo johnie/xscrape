@@ -1,6 +1,6 @@
 {
     "name": "xscrape",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "description": "A flexible and powerful library designed to extract and transform data from HTML documents using user-defined schemas",
     "main": "dist/index.js",
     "exports": {
