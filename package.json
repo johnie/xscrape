@@ -56,8 +56,8 @@
     "homepage": "https://github.com/johnie/xscrape#readme",
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.2",
-        "@biomejs/biome": "2.4.4",
-        "@changesets/changelog-github": "^0.5.2",
+        "@biomejs/biome": "2.4.6",
+        "@changesets/changelog-github": "^0.6.0",
         "@changesets/cli": "^2.29.8",
         "arktype": "^2.1.29",
         "effect": "^3.19.14",
