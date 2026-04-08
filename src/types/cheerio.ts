@@ -1,6 +1,7 @@
 import type { Element } from 'domhandler';
 
-// Re-define the types you need
+// Local copies of cheerio's internal extract types (cheerio@1.x).
+// These are not part of cheerio's public API exports.
 type ExtractDescriptorFn = (
   el: Element,
   key: string,

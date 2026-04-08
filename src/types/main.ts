@@ -5,22 +5,15 @@ type SchemaAwareExtractMap<T> = {
   [K in keyof T]: ExtractMap[string];
 };
 
-export type ScraperConfig<
+export interface ScraperConfig<
   S extends StandardSchemaV1,
   R extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
-> = {
-  schema: S;
+> {
   extract: SchemaAwareExtractMap<StandardSchemaV1.InferOutput<S>>;
+  schema: S;
   transform?: (data: StandardSchemaV1.InferOutput<S>) => Promise<R> | R;
-};
+}
 
-export type ValidationResult<T> = {
-  success: boolean;
-  data?: T;
-  error?: unknown;
-};
-
-export type ScraperResult<T> = {
-  data?: T;
-  error?: unknown;
-};
+export type ScraperResult<T> =
+  | { data: T; error?: undefined }
+  | { data?: undefined; error: unknown };
