@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import z from 'zod';
-import { defineScraper } from '@/defineScraper';
+import { defineScraper } from '@/index';
 import {
   kitchenSink,
   kitchenSinkWithLinks,
   kitchenSinkWithNested,
+  largeKitchenSink,
 } from './__fixtures__/html';
 
 describe('xscrape with Zod', () => {
@@ -27,7 +28,7 @@ describe('xscrape with Zod', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
         views: {
@@ -91,7 +92,7 @@ describe('xscrape with Zod', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
       },
@@ -126,7 +127,7 @@ describe('xscrape with Zod', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
         views: {
@@ -135,13 +136,13 @@ describe('xscrape with Zod', () => {
         },
       },
     });
-    try {
-      await scraper(
-        '<html><head><meta name="keywords" content="invalid"></head><body></body></html>',
-      );
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-    }
+    const { data, error } = await scraper(
+      '<html><head><meta name="keywords" content="invalid"></head><body></body></html>',
+    );
+
+    expect(data).toBeUndefined();
+    expect(error).toBeDefined();
+    expect(Array.isArray(error)).toBe(true);
   });
 
   test('extracts nested data from HTML', async () => {
@@ -217,5 +218,142 @@ describe('xscrape with Zod', () => {
         'mailto:example@example.com',
       ],
     });
+  });
+
+  test('applies sync transform', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string(),
+      }),
+      extract: {
+        title: { selector: 'title' },
+      },
+      transform: (data) => ({
+        ...data,
+        title: data.title.toUpperCase(),
+      }),
+    });
+    const { data, error } = await scraper(kitchenSink);
+
+    expect(error).toBeUndefined();
+    expect(data).toEqual({ title: 'EXAMPLE TITLE' });
+  });
+
+  test('applies async transform', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string(),
+      }),
+      extract: {
+        title: { selector: 'title' },
+      },
+      transform: async (data) => ({
+        ...data,
+        title: data.title.toLowerCase(),
+      }),
+    });
+    const { data, error } = await scraper(kitchenSink);
+
+    expect(error).toBeUndefined();
+    expect(data).toEqual({ title: 'example title' });
+  });
+
+  test('returns error when transform throws', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string(),
+      }),
+      extract: {
+        title: { selector: 'title' },
+      },
+      transform: () => {
+        throw new Error('transform failed');
+      },
+    });
+    const { data, error } = await scraper(kitchenSink);
+
+    expect(data).toBeUndefined();
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBe('transform failed');
+  });
+
+  test('scraper is reusable across multiple calls', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string(),
+      }),
+      extract: {
+        title: { selector: 'title' },
+      },
+    });
+
+    const first = await scraper(kitchenSink);
+    const second = await scraper(
+      '<html><head><title>Other</title></head><body></body></html>',
+    );
+
+    expect(first.data).toEqual({ title: 'Example Title' });
+    expect(second.data).toEqual({ title: 'Other' });
+  });
+
+  test('handles empty HTML string', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string().default('fallback'),
+      }),
+      extract: {
+        title: { selector: 'title' },
+      },
+    });
+    const { data, error } = await scraper('');
+
+    expect(error).toBeUndefined();
+    expect(data).toEqual({ title: 'fallback' });
+  });
+
+  test('extracts from large complex HTML', async () => {
+    const scraper = defineScraper({
+      schema: z.object({
+        title: z.string(),
+        description: z.string(),
+        ogTitle: z.string(),
+        ogImage: z.string(),
+        twitterCard: z.string(),
+        headings: z.array(z.string()),
+        tableRows: z.array(z.string()),
+      }),
+      extract: {
+        title: { selector: 'title' },
+        description: {
+          selector: 'meta[name="description"]',
+          value: 'content',
+        },
+        ogTitle: {
+          selector: 'meta[property="og:title"]',
+          value: 'content',
+        },
+        ogImage: {
+          selector: 'meta[property="og:image"]',
+          value: 'content',
+        },
+        twitterCard: {
+          selector: 'meta[name="twitter:card"]',
+          value: 'content',
+        },
+        headings: [{ selector: 'h2' }],
+        tableRows: [{ selector: 'tbody td:first-child' }],
+      },
+    });
+    const { data, error } = await scraper(largeKitchenSink);
+
+    expect(error).toBeUndefined();
+    expect(data?.title).toBe('HTML Kitchen Sink');
+    expect(data?.ogTitle).toBe('HTML Kitchen Sink Example');
+    expect(data?.ogImage).toBe('https://example.com/images/kitchen-sink.jpg');
+    expect(data?.twitterCard).toBe('summary_large_image');
+    expect(data?.headings).toContain('Headings');
+    expect(data?.headings).toContain('Tables');
+    expect(data?.tableRows).toContain('John Doe');
+    expect(data?.tableRows).toContain('Jane Doe');
   });
 });

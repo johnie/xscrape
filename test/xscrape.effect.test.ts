@@ -1,8 +1,9 @@
 // tests/scraper.effect.test.ts
-import { describe, test, expect } from 'vitest';
-import { defineScraper } from '@/defineScraper';
-import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
+
 import { Schema } from 'effect';
+import { describe, expect, test } from 'vitest';
+import { defineScraper } from '@/index';
+import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
 
 describe('xscrape with Effect Schema', () => {
   const effectSchema = Schema.Struct({
@@ -95,7 +96,7 @@ describe('xscrape with Effect Schema', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']
+            return el.attribs.content
               ?.split(',')
               .map((keyword) => keyword.trim());
           },
@@ -114,21 +115,17 @@ describe('xscrape with Effect Schema', () => {
   });
 
   test('handles invalid data', async () => {
+    const strictSchema = Schema.standardSchemaV1(
+      Schema.Struct({
+        title: Schema.String,
+        views: Schema.NumberFromString,
+      }),
+    );
     const scraper = defineScraper({
-      schema,
+      schema: strictSchema,
       extract: {
         title: {
           selector: 'title',
-        },
-        description: {
-          selector: 'meta[name="description"]',
-          value: 'content',
-        },
-        keywords: {
-          selector: 'meta[name="keywords"]',
-          value(el) {
-            return el.attribs['content']?.split(',');
-          },
         },
         views: {
           selector: 'meta[name="views"]',
@@ -136,13 +133,12 @@ describe('xscrape with Effect Schema', () => {
         },
       },
     });
-    try {
-      await scraper(
-        '<html><head><meta name="keywords" content="invalid"></head><body></body></html>',
-      );
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-    }
+    const { data, error } = await scraper(
+      '<html><head><meta name="views" content="not-a-number"></head><body></body></html>',
+    );
+
+    expect(data).toBeUndefined();
+    expect(error).toBeDefined();
   });
 
   test('extracts nested data from HTML', async () => {

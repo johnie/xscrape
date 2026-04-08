@@ -1,7 +1,7 @@
-import { describe, test, expect } from 'vitest';
-import { defineScraper } from '@/defineScraper';
+import { type } from 'arktype';
+import { describe, expect, test } from 'vitest';
+import { defineScraper } from '@/index';
 import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
-import { ArkError, type } from 'arktype';
 
 describe('xscrape with Arktype', () => {
   test('extracts data from HTML', async () => {
@@ -24,14 +24,14 @@ describe('xscrape with Arktype', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',') || [];
+            return el.attribs.content?.split(',') || [];
           },
         },
         views: {
           selector: 'meta[name="views"]',
           value(el) {
-            const raw = el.attribs['content'];
-            return raw == null ? undefined : parseInt(raw, 10);
+            const raw = el.attribs.content;
+            return raw == null ? undefined : Number.parseInt(raw, 10);
           },
         },
       },
@@ -74,8 +74,8 @@ describe('xscrape with Arktype', () => {
         views: {
           selector: 'meta[name="views"]',
           value(el) {
-            return el.attribs['content']
-              ? parseInt(el.attribs['content'], 10)
+            return el.attribs.content
+              ? Number.parseInt(el.attribs.content, 10)
               : 0;
           },
         },
@@ -104,7 +104,7 @@ describe('xscrape with Arktype', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',') || [];
+            return el.attribs.content?.split(',') || [];
           },
         },
       },
@@ -140,7 +140,7 @@ describe('xscrape with Arktype', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
         views: {
@@ -149,13 +149,13 @@ describe('xscrape with Arktype', () => {
         },
       },
     });
-    try {
-      await scraper(
-        '<html><head><meta name="keywords" content="invalid"></head><body></body></html>',
-      );
-    } catch (error) {
-      expect(error).toBeInstanceOf(ArkError);
-    }
+    const { data, error } = await scraper(
+      '<html><head><meta name="keywords" content="invalid"></head><body></body></html>',
+    );
+
+    expect(data).toBeUndefined();
+    expect(error).toBeDefined();
+    expect(Array.isArray(error)).toBe(true);
   });
 
   test('extracts nested data from HTML', async () => {
@@ -165,12 +165,16 @@ describe('xscrape with Arktype', () => {
         url: 'string.url',
         width: type('string').pipe((s) => {
           const n = Number(s);
-          if (Number.isNaN(n)) throw new Error(`width must be numeric`);
+          if (Number.isNaN(n)) {
+            throw new Error('width must be numeric');
+          }
           return n;
         }),
         height: type('string').pipe((s) => {
           const n = Number(s);
-          if (Number.isNaN(n)) throw new Error(`height must be numeric`);
+          if (Number.isNaN(n)) {
+            throw new Error('height must be numeric');
+          }
           return n;
         }),
       },

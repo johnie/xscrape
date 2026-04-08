@@ -1,18 +1,18 @@
-import * as v from 'valibot';
+import { array, object, optional, pipe, string, transform, url } from 'valibot';
 import { describe, expect, test } from 'vitest';
-import { defineScraper } from '@/defineScraper';
+import { defineScraper } from '@/index';
 import { kitchenSink, kitchenSinkWithNested } from './__fixtures__/html';
 
 describe('xscrape with Valibot', () => {
   test('extracts data from HTML', async () => {
     const scraper = defineScraper({
-      schema: v.object({
-        title: v.string(),
-        description: v.string(),
-        keywords: v.array(v.string()),
-        views: v.pipe(
-          v.string(),
-          v.transform((val) => Number(val)),
+      schema: object({
+        title: string(),
+        description: string(),
+        keywords: array(string()),
+        views: pipe(
+          string(),
+          transform((val) => Number(val)),
         ),
       }),
       extract: {
@@ -26,7 +26,7 @@ describe('xscrape with Valibot', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
         views: {
@@ -49,13 +49,13 @@ describe('xscrape with Valibot', () => {
 
   test('handles missing data', async () => {
     const scraper = defineScraper({
-      schema: v.object({
-        title: v.optional(v.string(), 'No title'),
-        description: v.optional(v.string(), 'No description'),
-        keywords: v.optional(v.array(v.string()), []),
-        views: v.pipe(
-          v.optional(v.string(), '0'),
-          v.transform((val) => Number(val)),
+      schema: object({
+        title: optional(string(), 'No title'),
+        description: optional(string(), 'No description'),
+        keywords: optional(array(string()), []),
+        views: pipe(
+          optional(string(), '0'),
+          transform((val) => Number(val)),
         ),
       }),
       extract: {
@@ -69,7 +69,7 @@ describe('xscrape with Valibot', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',') || [];
+            return el.attribs.content?.split(',') || [];
           },
         },
         views: {
@@ -94,14 +94,14 @@ describe('xscrape with Valibot', () => {
 
   test('handles multiple values', async () => {
     const scraper = defineScraper({
-      schema: v.object({
-        keywords: v.array(v.string()),
+      schema: object({
+        keywords: array(string()),
       }),
       extract: {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
       },
@@ -119,13 +119,13 @@ describe('xscrape with Valibot', () => {
 
   test('handles invalid data', async () => {
     const scraper = defineScraper({
-      schema: v.object({
-        title: v.string(),
-        description: v.string(),
-        keywords: v.array(v.string()),
-        views: v.pipe(
-          v.optional(v.string(), '0'),
-          v.transform((val) => Number(val)),
+      schema: object({
+        title: string(),
+        description: string(),
+        keywords: array(string()),
+        views: pipe(
+          optional(string(), '0'),
+          transform((val) => Number(val)),
         ),
       }),
       extract: {
@@ -139,7 +139,7 @@ describe('xscrape with Valibot', () => {
         keywords: {
           selector: 'meta[name="keywords"]',
           value(el) {
-            return el.attribs['content']?.split(',');
+            return el.attribs.content?.split(',');
           },
         },
         views: {
@@ -158,18 +158,18 @@ describe('xscrape with Valibot', () => {
 
   test('extracts nested data from HTML', async () => {
     const scraper = defineScraper({
-      schema: v.object({
-        title: v.string(),
-        image: v.optional(
-          v.object({
-            url: v.pipe(v.string(), v.url()),
-            width: v.pipe(
-              v.string(),
-              v.transform((v) => Number(v)),
+      schema: object({
+        title: string(),
+        image: optional(
+          object({
+            url: pipe(string(), url()),
+            width: pipe(
+              string(),
+              transform((val) => Number(val)),
             ),
-            height: v.pipe(
-              v.string(),
-              v.transform((v) => Number(v)),
+            height: pipe(
+              string(),
+              transform((val) => Number(val)),
             ),
           }),
         ),
