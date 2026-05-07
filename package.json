@@ -58,9 +58,7 @@
         }
     },
     "typings": "dist/index.d.mts",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist"],
     "packageManager": "pnpm@11.0.8",
     "keywords": [
         "web-scraping",
