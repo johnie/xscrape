@@ -22,7 +22,7 @@ const scraper = defineScraper({
     description: { selector: 'meta[name="description"]', value: 'content' },
     keywords: {
       selector: 'meta[name="keywords"]',
-      value: el => el.attribs.content?.split(',') || []
+      value: node => node.attr('content')?.split(',') || []
     },
     views: { selector: 'meta[name="views"]', value: 'content' },
   },

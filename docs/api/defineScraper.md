@@ -7,7 +7,7 @@ outline: deep
 Creates a scraper:
 
 - `schema: S` — Standard-Schema-compatible
-- `extract: Record<string, ExtractDescriptor | [ExtractDescriptor]>`
+- `extract: ExtractConfig<InferOutput<S>>`
 - `transform?: (data) => R | Promise<R>`
 
 Returns `(html: string) => Promise<{ data?: R; error?: unknown }>`.
