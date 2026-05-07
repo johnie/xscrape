@@ -102,11 +102,7 @@ function transformValidatedData<T, R extends T = T>(
   value: T,
   transform: ((data: T) => Promise<R> | R) | undefined,
 ): Promise<R | T> {
-  if (!transform) {
-    return Promise.resolve(value);
-  }
-
-  return Promise.resolve(transform(value));
+  return Promise.resolve(transform ? transform(value) : value);
 }
 
 function compileExtractConfig(
