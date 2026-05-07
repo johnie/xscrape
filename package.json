@@ -33,7 +33,8 @@
         "check": "ultracite check",
         "fix": "ultracite fix",
         "check-exports": "attw --pack .",
-        "local-release": "pnpm run ci && changeset version && changeset publish",
+        "version": "changeset version && pnpm run fix",
+        "local-release": "pnpm run ci && pnpm run version && changeset publish",
         "release": "pnpm run ci && changeset publish",
         "docs:dev": "vitepress dev docs",
         "docs:build": "vitepress build docs",
@@ -57,9 +58,7 @@
         }
     },
     "typings": "dist/index.d.mts",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist"],
     "packageManager": "pnpm@10.33.3",
     "keywords": [
         "web-scraping",
