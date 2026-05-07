@@ -147,32 +147,29 @@ function compileExtractDescriptor(
   $: LoadedDocument,
   descriptor: ExtractDescriptor<unknown>,
 ): InternalExtractDescriptor {
-  const { value } = descriptor;
-  const compiled: InternalExtractDescriptor = {
-    selector: descriptor.selector,
-  };
+  const value = compileDescriptorValue($, descriptor.value);
+  return value === undefined
+    ? { selector: descriptor.selector }
+    : { selector: descriptor.selector, value };
+}
 
-  if (value === undefined) {
-    return compiled;
-  }
-
-  if (typeof value === 'string') {
-    compiled.value = value;
-    return compiled;
+function compileDescriptorValue(
+  $: LoadedDocument,
+  value: ExtractDescriptor<unknown>['value'],
+): InternalExtractDescriptor['value'] {
+  if (value === undefined || typeof value === 'string') {
+    return value;
   }
 
   if (typeof value === 'function') {
-    compiled.value = (element, key, obj) =>
+    return (element, key, obj) =>
       value(createExtractNode($, element), key, obj);
-    return compiled;
   }
 
-  compiled.value = compileExtractConfig(
+  return compileExtractConfig(
     $,
     value as ExtractConfig<Record<string, unknown>>,
   );
-
-  return compiled;
 }
 
 function createExtractNode($: LoadedDocument, element: Element): ExtractNode {
