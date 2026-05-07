@@ -66,7 +66,7 @@ const scraper = defineScraper({
     description: { selector: 'meta[name="description"]', value: 'content' },
     keywords: {
       selector: 'meta[name="keywords"]',
-      value: (el) => el.attribs['content']?.split(',') || [],
+      value: (node) => node.attr('content')?.split(',') || [],
     },
     views: { selector: 'meta[name="views"]', value: 'content' },
   },
@@ -218,16 +218,16 @@ const scraper = defineScraper({
   extract: {
     tags: {
       selector: 'meta[name="keywords"]',
-      value: (el) => el.attribs['content']?.split(',').map(tag => tag.trim()) || [],
+      value: (node) => node.attr('content')?.split(',').map(tag => tag.trim()) || [],
     },
     publishedDate: {
       selector: 'meta[name="published"]',
-      value: (el) => new Date(el.attribs['content']),
+      value: (node) => new Date(node.attr('content') ?? ''),
     },
     readingTime: {
       selector: 'article',
-      value: (el) => {
-        const text = el.text();
+      value: (node) => {
+        const text = node.text();
         const wordsPerMinute = 200;
         const wordCount = text.split(/\s+/).length;
         return Math.ceil(wordCount / wordsPerMinute);
@@ -253,7 +253,7 @@ const scraper = defineScraper({
     description: { selector: 'meta[name="description"]', value: 'content' },
     tags: {
       selector: 'meta[name="keywords"]',
-      value: (el) => el.attribs['content']?.split(',') || [],
+      value: (node) => node.attr('content')?.split(',') || [],
     },
   },
   transform: (data) => ({
@@ -336,14 +336,18 @@ A scraper function that takes HTML string and returns `Promise<{ data?: T, error
 The `extract` object defines how to extract data from HTML:
 
 ```typescript
-type ExtractConfig = {
-  [key: string]: ExtractDescriptor | [ExtractDescriptor];
-};
+interface ExtractNode {
+  attr(name: string): string | undefined;
+  text(): string;
+  html(): string | undefined;
+}
 
 type ExtractDescriptor = {
   selector: string;
-  value?: string | ((el: Element) => any) | ExtractConfig;
+  value?: string | ((node: ExtractNode) => unknown) | ExtractConfig;
 };
+
+type ExtractConfig = Record<string, string | ExtractDescriptor | [string | ExtractDescriptor]>;
 ```
 
 #### Properties
@@ -351,7 +355,7 @@ type ExtractDescriptor = {
 - `selector`: CSS selector to find elements
 - `value`: How to extract the value:
   - `string`: Attribute name (e.g., `'href'`, `'content'`)
-  - `function`: Custom extraction function
+  - `function`: Custom extraction function receiving an xscrape `ExtractNode`
   - `object`: Nested extraction configuration
   - `undefined`: Extract text content
 

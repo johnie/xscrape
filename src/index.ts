@@ -1,45 +1,19 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import { load } from 'cheerio';
+import { createScraperRuntime } from '@/internal/runtime';
 import type { ScraperConfig, ScraperResult } from '@/types/main';
 
+export type {
+  ExtractConfig,
+  ExtractDescriptor,
+  ExtractField,
+  ExtractNode,
+  ExtractValueCallback,
+} from '@/types/extract';
 export type { ScraperConfig, ScraperResult } from '@/types/main';
 
 export function defineScraper<
   S extends StandardSchemaV1,
-  T extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
-  R extends T = T,
+  R extends StandardSchemaV1.InferOutput<S> = StandardSchemaV1.InferOutput<S>,
 >(config: ScraperConfig<S, R>): (html: string) => Promise<ScraperResult<R>> {
-  return async (html: string): Promise<ScraperResult<R>> => {
-    try {
-      const $ = load(html);
-      const extractedData = $.extract(config.extract);
-
-      const validationResult = await Promise.resolve(
-        config.schema['~standard'].validate(extractedData),
-      );
-
-      if (validationResult.issues) {
-        return { error: validationResult.issues };
-      }
-
-      if (!('value' in validationResult)) {
-        return {
-          error: new Error(
-            'xscrape: Validation succeeded but no data was returned',
-          ),
-        };
-      }
-
-      if (config.transform) {
-        const transformed = await Promise.resolve(
-          config.transform(validationResult.value),
-        );
-        return { data: transformed };
-      }
-
-      return { data: validationResult.value as R };
-    } catch (error) {
-      return { error };
-    }
-  };
+  return createScraperRuntime(config);
 }
