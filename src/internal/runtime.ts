@@ -122,20 +122,12 @@ function compileExtractField(
   field: ExtractField<unknown>,
 ): InternalExtractValue {
   if (Array.isArray(field)) {
-    return [compileArrayItem($, field[0])];
+    const item = field[0];
+    return [
+      typeof item === 'string' ? item : compileExtractDescriptor($, item),
+    ];
   }
 
-  if (typeof field === 'string') {
-    return field;
-  }
-
-  return compileExtractDescriptor($, field);
-}
-
-function compileArrayItem(
-  $: LoadedDocument,
-  field: string | ExtractDescriptor<unknown>,
-): string | InternalExtractDescriptor {
   if (typeof field === 'string') {
     return field;
   }
