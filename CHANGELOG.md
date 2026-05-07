@@ -1,5 +1,15 @@
 # xscrape
 
+## 3.2.1
+
+### Patch Changes
+
+- [#60](https://github.com/johnie/xscrape/pull/60) [`a70fb58`](https://github.com/johnie/xscrape/commit/a70fb584957ab2df6b96912bd696726d4d50461b) Thanks [@johnie](https://github.com/johnie)! - Internal cleanup with no public API changes.
+
+  - Refactor `src/internal/runtime.ts` for clarity: collapse `transformValidatedData`, split `compileExtractDescriptor` into a shape function plus a `compileDescriptorValue` helper, and inline the single-call `compileArrayItem` into `compileExtractField`
+  - Bump dev dependencies: `tsdown` 0.21 → 0.22, `valibot` 1.3 → 1.4, `vite` 8.0.10 → 8.0.11
+  - Bump `packageManager` to `pnpm@11.0.8`
+
 ## 3.2.0
 
 ### Minor Changes
