@@ -42,7 +42,7 @@
         "prepare": "lefthook install"
     },
     "type": "module",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "description": "A flexible and powerful library designed to extract and transform data from HTML documents using user-defined schemas",
     "main": "dist/index.cjs",
     "exports": {
@@ -58,7 +58,9 @@
         }
     },
     "typings": "dist/index.d.mts",
-    "files": ["dist"],
+    "files": [
+        "dist"
+    ],
     "packageManager": "pnpm@11.0.8",
     "keywords": [
         "web-scraping",
