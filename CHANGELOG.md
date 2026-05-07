@@ -1,5 +1,17 @@
 # xscrape
 
+## 3.2.0
+
+### Minor Changes
+
+- [#57](https://github.com/johnie/xscrape/pull/57) [`0359e19`](https://github.com/johnie/xscrape/commit/0359e19f240adabdf825fbd72bb231bd67127e34) Thanks [@johnie](https://github.com/johnie)! - Replace Cheerio with custom runtime for HTML extraction
+
+  - Custom Runtime: Replaced Cheerio with a custom runtime for HTML extraction, improving performance and flexibility
+  - New Extract Types: Added dedicated `ExtractConfig` and related types for better type safety and developer experience
+  - Enhanced Documentation: Updated API docs and README with new runtime and type information
+  - New Tests: Added compatibility and runtime tests for the new implementation
+  - Updated dependencies and configuration files
+
 ## 3.0.4
 
 ### Patch Changes
