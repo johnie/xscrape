@@ -102,11 +102,7 @@ function transformValidatedData<T, R extends T = T>(
   value: T,
   transform: ((data: T) => Promise<R> | R) | undefined,
 ): Promise<R | T> {
-  if (!transform) {
-    return Promise.resolve(value);
-  }
-
-  return Promise.resolve(transform(value));
+  return Promise.resolve(transform ? transform(value) : value);
 }
 
 function compileExtractConfig(
@@ -126,20 +122,12 @@ function compileExtractField(
   field: ExtractField<unknown>,
 ): InternalExtractValue {
   if (Array.isArray(field)) {
-    return [compileArrayItem($, field[0])];
+    const item = field[0];
+    return [
+      typeof item === 'string' ? item : compileExtractDescriptor($, item),
+    ];
   }
 
-  if (typeof field === 'string') {
-    return field;
-  }
-
-  return compileExtractDescriptor($, field);
-}
-
-function compileArrayItem(
-  $: LoadedDocument,
-  field: string | ExtractDescriptor<unknown>,
-): string | InternalExtractDescriptor {
   if (typeof field === 'string') {
     return field;
   }
@@ -151,32 +139,29 @@ function compileExtractDescriptor(
   $: LoadedDocument,
   descriptor: ExtractDescriptor<unknown>,
 ): InternalExtractDescriptor {
-  const { value } = descriptor;
-  const compiled: InternalExtractDescriptor = {
-    selector: descriptor.selector,
-  };
+  const value = compileDescriptorValue($, descriptor.value);
+  return value === undefined
+    ? { selector: descriptor.selector }
+    : { selector: descriptor.selector, value };
+}
 
-  if (value === undefined) {
-    return compiled;
-  }
-
-  if (typeof value === 'string') {
-    compiled.value = value;
-    return compiled;
+function compileDescriptorValue(
+  $: LoadedDocument,
+  value: ExtractDescriptor<unknown>['value'],
+): InternalExtractDescriptor['value'] {
+  if (value === undefined || typeof value === 'string') {
+    return value;
   }
 
   if (typeof value === 'function') {
-    compiled.value = (element, key, obj) =>
+    return (element, key, obj) =>
       value(createExtractNode($, element), key, obj);
-    return compiled;
   }
 
-  compiled.value = compileExtractConfig(
+  return compileExtractConfig(
     $,
     value as ExtractConfig<Record<string, unknown>>,
   );
-
-  return compiled;
 }
 
 function createExtractNode($: LoadedDocument, element: Element): ExtractNode {
