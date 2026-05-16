@@ -36,7 +36,7 @@
         "test:watch": "vitest",
         "check": "ultracite check",
         "fix": "ultracite fix",
-        "check-exports": "attw --pack .",
+        "check-exports": "attw --pack . --profile esm-only",
         "version": "changeset version && pnpm run fix",
         "local-release": "pnpm run ci && pnpm run version && changeset publish",
         "release": "pnpm run ci && changeset publish",
@@ -48,17 +48,11 @@
     "type": "module",
     "version": "3.2.1",
     "description": "A flexible and powerful library designed to extract and transform data from HTML documents using user-defined schemas",
-    "main": "dist/index.cjs",
+    "main": "dist/index.mjs",
     "exports": {
         ".": {
-            "import": {
-                "types": "./dist/index.d.mts",
-                "default": "./dist/index.mjs"
-            },
-            "require": {
-                "types": "./dist/index.d.cts",
-                "default": "./dist/index.cjs"
-            }
+            "types": "./dist/index.d.mts",
+            "default": "./dist/index.mjs"
         }
     },
     "typings": "dist/index.d.mts",
