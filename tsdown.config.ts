@@ -6,4 +6,8 @@ export default defineConfig({
   dts: true,
   outDir: 'dist',
   clean: true,
+  minify: true,
+  report: true,
+  publint: true,
+  attw: true,
 });

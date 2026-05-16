@@ -1,0 +1,15 @@
+[
+    {
+        "name": "Dist (xscrape only)",
+        "path": "dist/index.mjs",
+        "import": "{ defineScraper }",
+        "ignore": ["cheerio", "domhandler", "@standard-schema/spec"],
+        "limit": "2 KB"
+    },
+    {
+        "name": "Consumer cost (with cheerio)",
+        "path": "dist/index.mjs",
+        "import": "{ defineScraper }",
+        "limit": "100 KB"
+    }
+]
