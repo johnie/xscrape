@@ -1,5 +1,13 @@
 # xscrape
 
+## 4.0.0
+
+### Major Changes
+
+- [#62](https://github.com/johnie/xscrape/pull/62) [`82fcbe6`](https://github.com/johnie/xscrape/commit/82fcbe6dde94dc8106da12a6a8872fdc57856bb2) Thanks [@johnie](https://github.com/johnie)! - Drop CJS build. The package now ships ESM only.
+
+  Migration: import via `import { defineScraper } from 'xscrape'`. Consumers using `require('xscrape')` must migrate to ESM (Node 18+ supports ESM natively).
+
 ## 3.2.1
 
 ### Patch Changes
