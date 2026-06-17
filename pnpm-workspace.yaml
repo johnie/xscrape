@@ -1,3 +1,6 @@
 allowBuilds:
   esbuild: true
   lefthook: true
+minimumReleaseAgeExclude:
+  - arkregex@0.0.6
+  - arktype@2.2.1
