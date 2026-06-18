@@ -1,8 +1,3 @@
----
-# https://vitepress.dev/reference/default-theme-home-page
-layout: doc
----
-
 # 🕷️ xscrape
 
 Extract and transform HTML with your own schema, powered by **Standard Schema** compatibility.
