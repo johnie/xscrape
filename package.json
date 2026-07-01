@@ -6,11 +6,11 @@
     },
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.3",
-        "@biomejs/biome": "2.5.0",
+        "@biomejs/biome": "2.5.1",
         "@changesets/changelog-github": "^0.7.0",
         "@changesets/cli": "^2.31.0",
         "@size-limit/preset-small-lib": "^12.1.0",
-        "@types/node": "^25.9.3",
+        "@types/node": "^26.0.1",
         "arktype": "^2.2.1",
         "effect": "^3.21.3",
         "jsdom": "^29.1.1",
