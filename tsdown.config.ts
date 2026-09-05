@@ -1,13 +1,13 @@
-import { defineConfig } from 'tsdown';
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm'],
-  dts: true,
-  outDir: 'dist',
+  attw: { profile: "esm-only" },
   clean: true,
+  dts: true,
+  entry: ["src/index.ts"],
+  format: ["esm"],
   minify: true,
-  report: true,
+  outDir: "dist",
   publint: true,
-  attw: { profile: 'esm-only' },
+  report: true,
 });

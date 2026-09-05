@@ -1,82 +1,94 @@
 {
-    "dependencies": {
-        "@standard-schema/spec": "^1.1.0",
-        "cheerio": "^1.2.0",
-        "domhandler": "^6.0.1"
+  "name": "xscrape",
+  "version": "4.0.0",
+  "description": "Extract typed data from HTML with CSS selectors and Standard Schema validation",
+  "keywords": [
+    "arktype",
+    "automation",
+    "crawler",
+    "data-extraction",
+    "data-transformation",
+    "effect-schema",
+    "html-parsing",
+    "scraper",
+    "standard-schema",
+    "user-defined-schemas",
+    "valibot",
+    "web-scraping",
+    "zod"
+  ],
+  "homepage": "https://github.com/johnie/xscrape#readme",
+  "bugs": {
+    "url": "https://github.com/johnie/xscrape/issues"
+  },
+  "license": "MIT",
+  "author": "Johnie Hjelm <johnie@hjelm.im>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnie/xscrape.git"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "schema",
+    "llms.txt"
+  ],
+  "type": "module",
+  "main": "dist/index.mjs",
+  "typings": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
-    "devDependencies": {
-        "@arethetypeswrong/cli": "^0.18.3",
-        "@biomejs/biome": "2.5.0",
-        "@changesets/changelog-github": "^0.7.0",
-        "@changesets/cli": "^2.31.0",
-        "@size-limit/preset-small-lib": "^12.1.0",
-        "@types/node": "^25.9.3",
-        "arktype": "^2.2.1",
-        "effect": "^3.21.3",
-        "jsdom": "^29.1.1",
-        "lefthook": "^2.1.9",
-        "publint": "^0.3.21",
-        "size-limit": "^12.1.0",
-        "tsdown": "^0.22.3",
-        "typescript": "^6.0.3",
-        "ultracite": "7.8.3",
-        "valibot": "^1.4.1",
-        "vite": "^8.0.16",
-        "vitest": "^4.1.9",
-        "zod": "^4.4.3"
-    },
-    "name": "xscrape",
-    "scripts": {
-        "build": "tsdown",
-        "size": "size-limit",
-        "ci": "pnpm run build && pnpm run check && pnpm run typecheck && pnpm run check-exports && pnpm run test && pnpm run size",
-        "typecheck": "tsc",
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "check": "ultracite check",
-        "fix": "ultracite fix",
-        "check-exports": "attw --pack . --profile esm-only",
-        "version": "changeset version && pnpm run fix",
-        "local-release": "pnpm run ci && pnpm run version && changeset publish",
-        "release": "pnpm run ci && changeset publish",
-        "prepare": "lefthook install"
-    },
-    "type": "module",
-    "version": "4.0.0",
-    "description": "A flexible and powerful library designed to extract and transform data from HTML documents using user-defined schemas",
-    "main": "dist/index.mjs",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.mts",
-            "default": "./dist/index.mjs"
-        }
-    },
-    "typings": "dist/index.d.mts",
-    "files": ["dist"],
-    "packageManager": "pnpm@11.7.0",
-    "keywords": [
-        "web-scraping",
-        "data-extraction",
-        "automation",
-        "html-parsing",
-        "data-transformation",
-        "user-defined-schemas",
-        "crawler",
-        "scraper",
-        "zod",
-        "valibot",
-        "arktype",
-        "effect-schema",
-        "standard-schema"
-    ],
-    "author": "Johnie Hjelm <johnie@hjelm.im>",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/johnie/xscrape.git"
-    },
-    "bugs": {
-        "url": "https://github.com/johnie/xscrape/issues"
-    },
-    "homepage": "https://github.com/johnie/xscrape#readme"
+    "./extract-config.schema.json": "./schema/extract-config.schema.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "size": "size-limit",
+    "ci": "pnpm run build && pnpm run docs:check && pnpm run check && pnpm run typecheck && pnpm run check-exports && pnpm run test && pnpm run size",
+    "bench": "vitest bench --run",
+    "docs:check": "node scripts/sync-examples.mjs --check",
+    "docs:sync": "node scripts/sync-examples.mjs",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "check-exports": "attw --pack . --profile esm-only",
+    "version": "changeset version && pnpm run fix",
+    "local-release": "pnpm run ci && pnpm run version && changeset publish",
+    "release": "pnpm run ci && changeset publish",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.3",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
+    "@size-limit/preset-small-lib": "^12.1.0",
+    "@types/node": "^25.9.3",
+    "arktype": "^2.2.1",
+    "domhandler": "^6.0.1",
+    "effect": "^3.21.3",
+    "lefthook": "^2.1.9",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
+    "publint": "^0.3.21",
+    "size-limit": "^12.1.0",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3",
+    "ultracite": "7.10.8",
+    "valibot": "^1.4.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9",
+    "zod": "^4.4.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@11.7.0"
 }
