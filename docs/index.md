@@ -1,10 +1,14 @@
-# 🕷️ xscrape
+# xscrape
 
-Extract and transform HTML with your own schema, powered by **Standard Schema** compatibility.
+xscrape extracts data from HTML and validates it with Standard Schema. It does not fetch URLs or execute page scripts.
 
-- Universal support: Zod, Valibot, ArkType, Effect…
-- Flexible extraction: CSS selectors, attributes, functions, nested
-- Type-safe: Full TypeScript inference
-- Error handling & defaults
-
-> Read the [Quick Start](quick-start.md) to get up and running.
+- [Installation](installation.md)
+- [Quick start](quick-start.md)
+- [API](api/defineScraper.md)
+- [Extraction contract](api/extract-config.md)
+- [Errors](api/errors.md)
+- [Types](api/types.md)
+- [Schema examples](examples.md)
+- [Performance and document reuse](performance.md)
+- [Migration from v4](migration-v5.md)
+- [Agent reference](../llms.txt)

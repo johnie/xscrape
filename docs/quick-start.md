@@ -1,36 +1,39 @@
----
-outline: deep
----
+# Quick start
 
-# Quick Start
+Install `xscrape` and a Standard Schema validation library. This example uses Zod.
 
-```ts
-import { defineScraper } from 'xscrape'
-import { z } from 'zod'
+<!-- example: quick-start -->
 
-const schema = z.object({
-  title: z.string(),
-  description: z.string(),
-  keywords: z.array(z.string()),
-  views: z.coerce.number(),
-})
+```typescript
+import { attr, defineScraper, text, toDiagnostic } from "xscrape";
+import { z } from "zod";
 
-const scraper = defineScraper({
-  schema,
+const scrape = defineScraper({
   extract: {
-    title: { selector: 'title' },
-    description: { selector: 'meta[name="description"]', value: 'content' },
-    keywords: {
-      selector: 'meta[name="keywords"]',
-      value: node => node.attr('content')?.split(',') || []
-    },
-    views: { selector: 'meta[name="views"]', value: 'content' },
+    description: attr('meta[name="description"]', "content"),
+    title: text("title"),
+    views: attr('meta[name="views"]', "content"),
   },
-})
+  schema: z.object({
+    description: z.string().default("No description"),
+    title: z.string(),
+    views: z.coerce.number(),
+  }),
+});
 
-const html = /* your HTML string */
-const { data, error } = await scraper(html)
+export const result = await scrape(`
+  <title>Example</title>
+  <meta name="views" content="42">
+`);
+
+// Success data: { description: "No description", title: "Example", views: 42 }
+if (result.ok) {
+  console.log(result.data);
+} else {
+  console.error(toDiagnostic(result.error));
+}
 ```
 
-- **data**: validated result
-- **error**: validation or extraction errors
+<!-- /example -->
+
+The scraper consumes an HTML string, not a URL. Fetching and browser rendering belong to the caller.

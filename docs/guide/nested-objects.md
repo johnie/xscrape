@@ -1,20 +1,37 @@
----
-outline: deep
----
+# Nested objects
 
-# Nested Objects
+`nested(selector, fields)` reads the first matching parent. `many(selector, fields)` reads all matching parents. Child selectors query descendants within each parent.
 
-Pass an object to `value` for nested maps:
+<!-- example: nested-products -->
 
-```ts
-extract: {
-  image: {
-    selector: 'head',
-    value: {
-      url:    { selector: 'meta[property="og:image"]', value: 'content' },
-      width:  { selector: 'meta[property="og:image:width"]', value: 'content' },
-      height: { selector: 'meta[property="og:image:height"]', value: 'content' },
-    }
-  }
-}
+```typescript
+import { attr, defineScraper, many, text } from "xscrape";
+import { z } from "zod";
+
+const scrape = defineScraper({
+  extract: {
+    products: many("article", {
+      name: text("h2"),
+      price: text("span"),
+      url: attr("a", "href"),
+    }),
+  },
+  schema: z.object({
+    products: z.array(
+      z.object({
+        name: z.string(),
+        price: z.coerce.number(),
+        url: z.string(),
+      })
+    ),
+  }),
+});
+
+export const result = await scrape(`
+  <article><h2>Book</h2><span>12</span><a href="/book">Buy</a></article>
+  <article><h2>Pen</h2><span>3</span><a href="/pen">Buy</a></article>
+`);
+// Relative hrefs stay relative. Resolve them against a trusted base URL if needed.
 ```
+
+<!-- /example -->
