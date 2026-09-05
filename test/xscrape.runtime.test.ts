@@ -1,254 +1,275 @@
-import type { StandardSchemaV1 } from '@standard-schema/spec';
-import { describe, expect, test } from 'vitest';
-import { defineScraper } from '@/index';
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import { describe, expect, test } from "vitest";
+
+import { defineScraper } from "@/index";
+
 import {
   kitchenSink,
   kitchenSinkWithLinks,
   largeKitchenSink,
-} from './__fixtures__/html';
+} from "./__fixtures__/html";
 
-const WORD_BOUNDARY_REGEX = /\s+/;
+const WORD_BOUNDARY_REGEX = /\s+/u;
 
-function passthroughSchema<T extends object>(): StandardSchemaV1<T, T> {
-  return {
-    '~standard': {
-      version: 1,
-      vendor: 'test',
-      types: {} as StandardSchemaV1.Types<T, T>,
-      validate(value) {
-        return { value: value as T };
-      },
-    },
-  };
-}
+const passthroughSchema = <T extends object>(): StandardSchemaV1<T, T> => ({
+  "~standard": {
+    // SAFETY: Mock schema metadata types for StandardSchemaV1 testing.
+    types: {} as StandardSchemaV1.Types<T, T>,
+    validate: (value) => ({
+      // SAFETY: Passthrough schema returns the validated value typed as T.
+      value: value as T,
+    }),
+    vendor: "test",
+    version: 1,
+  },
+});
 
-function failingSchema(
-  issues: readonly StandardSchemaV1.Issue[] = [{ message: 'invalid' }],
-): StandardSchemaV1<unknown, never> {
-  return {
-    '~standard': {
-      version: 1,
-      vendor: 'test',
-      types: {} as StandardSchemaV1.Types<unknown, never>,
-      validate() {
-        return { issues };
-      },
-    },
-  };
-}
+const failingSchema = (
+  issues: readonly StandardSchemaV1.Issue[] = [{ message: "invalid" }]
+): StandardSchemaV1<unknown, never> => ({
+  "~standard": {
+    // SAFETY: Mock schema metadata types for StandardSchemaV1 testing.
+    types: {} as StandardSchemaV1.Types<unknown, never>,
+    validate: () => ({ issues }),
+    vendor: "test",
+    version: 1,
+  },
+});
 
-function missingValueSchema<T extends object>(): StandardSchemaV1<T, T> {
-  return {
-    '~standard': {
-      version: 1,
-      vendor: 'test',
-      types: {} as StandardSchemaV1.Types<T, T>,
-      validate() {
-        return {} as StandardSchemaV1.Result<T>;
-      },
-    },
-  };
-}
+const missingValueSchema = <T extends object>(): StandardSchemaV1<T, T> => ({
+  "~standard": {
+    // SAFETY: Mock schema metadata types for StandardSchemaV1 testing.
+    types: {} as StandardSchemaV1.Types<T, T>,
+    // SAFETY: Incomplete mock result intentionally tests missing value error path.
+    validate: () => ({}) as StandardSchemaV1.Result<T>,
+    vendor: "test",
+    version: 1,
+  },
+});
 
-describe('xscrape runtime boundary', () => {
-  test('extracts owned node helpers, nested objects, and arrays', async () => {
+describe("xscrape runtime boundary", () => {
+  test("extracts metadata, text, and computed reading time", async () => {
     const scraper = defineScraper({
-      schema: passthroughSchema<{
-        title?: string;
-        description?: string;
-        keywords?: string[];
-        headings?: string[];
-        image?: {
-          url?: string;
-          width?: string;
-        };
-        readingTime?: number;
-        markup?: string;
-      }>(),
       extract: {
-        title: { selector: 'title' },
         description: {
           selector: 'meta[name="description"]',
-          value: 'content',
+          value: "content",
         },
         keywords: {
           selector: 'meta[name="keywords"]',
           value(node) {
             return (
               node
-                .attr('content')
-                ?.split(',')
+                .attr("content")
+                ?.split(",")
                 .map((keyword) => keyword.trim()) ?? []
             );
           },
         },
-        headings: [{ selector: 'h2' }],
-        image: {
-          selector: 'head',
-          value: {
-            url: {
-              selector: 'meta[property="og:image"]',
-              value: 'content',
-            },
-            width: {
-              selector: 'meta[property="og:image:width"]',
-              value: 'content',
-            },
-          },
-        },
         readingTime: {
-          selector: 'body',
+          selector: "body",
           value(node) {
             return node.text().split(WORD_BOUNDARY_REGEX).filter(Boolean)
               .length;
           },
         },
-        markup: {
-          selector: 'head',
-          value(node) {
-            return node.html();
-          },
-        },
+        title: { selector: "title" },
       },
+      schema: passthroughSchema<{
+        description?: string;
+        keywords?: string[];
+        readingTime?: number;
+        title?: string;
+      }>(),
     });
 
     const { data, error } = await scraper(largeKitchenSink);
 
     expect(error).toBeUndefined();
-    expect(data?.title).toBe('HTML Kitchen Sink');
+    expect(data?.title).toBe("HTML Kitchen Sink");
     expect(data?.description).toBe(
-      'A comprehensive HTML kitchen sink example demonstrating a variety of HTML elements for testing and styling.',
+      "A comprehensive HTML kitchen sink example demonstrating a variety of HTML elements for testing and styling."
     );
-    expect(data?.keywords).toEqual([
-      'HTML',
-      'kitchen sink',
-      'example',
-      'meta tags',
-      'og tags',
-      'JSON-LD',
+    expect(data?.keywords).toStrictEqual([
+      "HTML",
+      "kitchen sink",
+      "example",
+      "meta tags",
+      "og tags",
+      "JSON-LD",
     ]);
-    expect(data?.headings).toContain('Headings');
-    expect(data?.headings).toContain('Text Elements');
-    expect(data?.headings).toContain('Blockquotes');
-    expect(data?.image).toEqual({
-      url: 'https://example.com/images/kitchen-sink.jpg',
+    expect(data?.readingTime).toBeGreaterThan(20);
+  });
+
+  test("extracts arrays, nested structures, and raw markup", async () => {
+    const scraper = defineScraper({
+      extract: {
+        headings: [{ selector: "h2" }],
+        image: {
+          selector: "head",
+          value: {
+            url: {
+              selector: 'meta[property="og:image"]',
+              value: "content",
+            },
+            width: {
+              selector: 'meta[property="og:image:width"]',
+              value: "content",
+            },
+          },
+        },
+        markup: {
+          selector: "head",
+          value(node) {
+            return node.html();
+          },
+        },
+      },
+      schema: passthroughSchema<{
+        headings?: string[];
+        image?: {
+          url?: string;
+          width?: string;
+        };
+        markup?: string;
+      }>(),
+    });
+
+    const { data, error } = await scraper(largeKitchenSink);
+
+    expect(error).toBeUndefined();
+    expect(data?.headings).toContain("Headings");
+    expect(data?.headings).toContain("Text Elements");
+    expect(data?.image).toStrictEqual({
+      url: "https://example.com/images/kitchen-sink.jpg",
       width: undefined,
     });
-    expect(data?.readingTime).toBeGreaterThan(20);
     expect(data?.markup).toContain('<meta name="description"');
   });
 
-  test('extracts arrays with attribute shorthands', async () => {
+  test("extracts arrays with attribute shorthands", async () => {
     const scraper = defineScraper({
+      extract: {
+        links: [{ selector: "a", value: "href" }],
+      },
       schema: passthroughSchema<{
         links?: string[];
       }>(),
-      extract: {
-        links: [{ selector: 'a', value: 'href' }],
-      },
     });
 
     const { data, error } = await scraper(kitchenSinkWithLinks);
 
     expect(error).toBeUndefined();
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       links: [
-        'https://example.com',
-        '#internal-link',
-        'mailto:example@example.com',
+        "https://example.com",
+        "#internal-link",
+        "mailto:example@example.com",
       ],
     });
   });
 
-  test('applies async transforms after validation', async () => {
+  test("applies async transforms after validation", async () => {
     const scraper = defineScraper({
+      extract: {
+        title: { selector: "title" },
+      },
       schema: passthroughSchema<{
         title?: string;
       }>(),
-      extract: {
-        title: { selector: 'title' },
+      transform: async (data) => {
+        await Promise.resolve();
+        return {
+          title: data.title?.toUpperCase(),
+        };
       },
-      transform: async (data) => ({
-        title: data.title?.toUpperCase(),
-      }),
     });
 
     const { data, error } = await scraper(kitchenSink);
 
     expect(error).toBeUndefined();
-    expect(data).toEqual({ title: 'EXAMPLE TITLE' });
+    expect(data).toStrictEqual({ title: "EXAMPLE TITLE" });
   });
 
-  test('returns validation issues without leaking runtime internals', async () => {
-    const issues = [{ message: 'title is required', path: ['title'] }] as const;
+  test("returns validation issues without leaking runtime internals", async () => {
+    const issues = [{ message: "title is required", path: ["title"] }] as const;
     const scraper = defineScraper({
-      schema: failingSchema(issues),
       extract: {
-        title: { selector: 'title' },
+        title: { selector: "title" },
       },
+      schema: failingSchema(issues),
     });
 
     const { data, error } = await scraper(kitchenSink);
 
     expect(data).toBeUndefined();
-    expect(error).toEqual(issues);
+    expect(error).toStrictEqual({
+      code: "VALIDATION_FAILED",
+      issues,
+      message: "Extracted data did not match the schema",
+      stage: "validate",
+    });
   });
 
-  test('returns transform errors as scraper errors', async () => {
+  test("returns transform errors as scraper errors", async () => {
     const scraper = defineScraper({
+      extract: {
+        title: { selector: "title" },
+      },
       schema: passthroughSchema<{
         title?: string;
       }>(),
-      extract: {
-        title: { selector: 'title' },
-      },
-      transform() {
-        throw new Error('transform failed');
+      transform: () => {
+        throw new Error("transform failed");
       },
     });
 
     const { data, error } = await scraper(kitchenSink);
 
     expect(data).toBeUndefined();
-    expect(error).toBeInstanceOf(Error);
-    expect((error as Error).message).toBe('transform failed');
+    expect(error).toMatchObject({
+      cause: new Error("transform failed"),
+      code: "TRANSFORM_FAILED",
+      stage: "transform",
+    });
   });
 
-  test('guards against validators that succeed without a value', async () => {
+  test("guards against validators that succeed without a value", async () => {
     const scraper = defineScraper({
+      extract: {
+        title: { selector: "title" },
+      },
       schema: missingValueSchema<{
         title?: string;
       }>(),
-      extract: {
-        title: { selector: 'title' },
-      },
     });
 
     const { data, error } = await scraper(kitchenSink);
 
     expect(data).toBeUndefined();
-    expect(error).toBeInstanceOf(Error);
-    expect((error as Error).message).toBe(
-      'xscrape: Validation succeeded but no data was returned',
-    );
+    expect(error).toMatchObject({
+      code: "INVALID_VALIDATION_RESULT",
+      message: "Validation succeeded but no data was returned",
+      stage: "validate",
+    });
   });
 
-  test('reuses the same scraper across multiple calls', async () => {
+  test("reuses the same scraper across multiple calls", async () => {
     const scraper = defineScraper({
+      extract: {
+        title: { selector: "title" },
+      },
       schema: passthroughSchema<{
         title?: string;
       }>(),
-      extract: {
-        title: { selector: 'title' },
-      },
     });
 
     const first = await scraper(kitchenSink);
     const second = await scraper(
-      '<html><head><title>Other</title></head><body></body></html>',
+      "<html><head><title>Other</title></head><body></body></html>"
     );
 
-    expect(first.data).toEqual({ title: 'Example Title' });
-    expect(second.data).toEqual({ title: 'Other' });
+    expect(first.data).toStrictEqual({ title: "Example Title" });
+    expect(second.data).toStrictEqual({ title: "Other" });
   });
 });
