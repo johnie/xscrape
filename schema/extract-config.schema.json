@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnie/xscrape/extract-config.schema.json",
+  "title": "xscrape declarative extraction configuration",
+  "description": "The JSON-safe extraction subset. Schemas and callback functions are supplied separately in trusted code. CSS selector syntax is checked during extraction.",
+  "$ref": "#/$defs/fields",
+  "$defs": {
+    "fields": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/field" }
+    },
+    "field": {
+      "anyOf": [
+        { "$ref": "#/$defs/single" },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "many" },
+            "field": { "$ref": "#/$defs/single" }
+          },
+          "required": ["kind", "field"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "single": {
+      "anyOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "enum": ["text", "html"] },
+            "selector": { "type": "string" }
+          },
+          "required": ["kind", "selector"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "enum": ["attr", "prop"] },
+            "selector": { "type": "string" },
+            "name": { "type": "string" }
+          },
+          "required": ["kind", "selector", "name"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "object" },
+            "selector": { "type": "string" },
+            "fields": { "$ref": "#/$defs/fields" }
+          },
+          "required": ["kind", "selector", "fields"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
