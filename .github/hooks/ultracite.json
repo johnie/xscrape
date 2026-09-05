@@ -1,10 +1,14 @@
 {
-    "hooks": {
-        "PostToolUse": [
-            {
-                "command": "pnpm fix --skip=correctness/noUnusedImports",
-                "type": "command"
-            }
-        ]
-    }
+  "hooks": {
+    "PostToolUse": [
+      {
+        "command": "pnpm fix --skip=correctness/noUnusedImports",
+        "type": "command"
+      },
+      {
+        "command": "pnpm run fix",
+        "type": "command"
+      }
+    ]
+  }
 }
