@@ -1,426 +1,238 @@
-<p align="center">
+# xscrape
 
-  <h1 align="center">🕷️<br/><code>xscrape</code></h1>
-  <p align="center">Extract and transform HTML with your own schema, powered by <code>Standard Schema</code> compatibility.
-    <br/>
-    by <a href="https://github.com/johnie">@johnie</a>
-  </p>
-</p>
-<br/>
+Extract typed data from HTML with CSS selectors and [Standard Schema](https://standardschema.dev) validation. Supports Zod, Valibot, ArkType, and Effect Schema.
 
-<p align="center">
-<a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/johnie/xscrape" alt="License"></a>
-<a href="https://www.npmjs.com/package/xscrape" rel="nofollow"><img src="https://img.shields.io/npm/v/xscrape.svg" alt="npm"></a>
-<a href="https://github.com/johnie/xscrape/actions"><img src="https://github.com/johnie/xscrape/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
-<a href="https://github.com/johnie/xscrape" rel="nofollow"><img src="https://img.shields.io/github/stars/johnie/xscrape" alt="stars"></a>
-</p>
+```text
+HTML or parsed document → extraction → schema validation → optional transform → result
+```
 
-<br/>
-<br/>
-
-## Overview
-
-xscrape is a powerful HTML scraping library that combines the flexibility of query selectors with the safety of schema validation. It works with any validation library that implements the [Standard Schema](https://standardschema.dev) specification, including Zod, Valibot, ArkType, and Effect Schema.
-
-## Features
-
-- **HTML Parsing**: Extract data from HTML using query selectors powered by [cheerio](https://github.com/cheeriojs/cheerio)
-- **Universal Schema Support**: Works with any [Standard Schema](https://standardschema.dev) compatible library
-- **Type Safety**: Full TypeScript support with inferred types from your schemas
-- **Flexible Extraction**: Support for nested objects, arrays, and custom transformation functions
-- **Error Handling**: Comprehensive error handling with detailed validation feedback
-- **Custom Transformations**: Apply post-processing transformations to validated data
-- **Default Values**: Handle missing data gracefully through schema defaults
+xscrape consumes HTML strings. It does not fetch URLs, run page JavaScript, or launch a browser.
 
 ## Installation
 
-Install xscrape with your preferred package manager:
-
 ```bash
+pnpm install xscrape
+# or:
 npm install xscrape
-# or
-pnpm add xscrape
-# or
+# or:
 bun add xscrape
 ```
 
-## Quick Start
+ESM only. Requires Node.js 22.12 or newer; CI tests Node.js 22 and 24. Other runtimes are not currently covered by CI. Install your preferred Standard Schema validation library separately.
+
+## Quick start
+
+<!-- example: quick-start -->
 
 ```typescript
-import { defineScraper } from 'xscrape';
-import { z } from 'zod';
+import { attr, defineScraper, text, toDiagnostic } from "xscrape";
+import { z } from "zod";
 
-// Define your schema
-const schema = z.object({
-  title: z.string(),
-  description: z.string(),
-  keywords: z.array(z.string()),
-  views: z.coerce.number(),
-});
-
-// Create a scraper
-const scraper = defineScraper({
-  schema,
+const scrape = defineScraper({
   extract: {
-    title: { selector: 'title' },
-    description: { selector: 'meta[name="description"]', value: 'content' },
-    keywords: {
-      selector: 'meta[name="keywords"]',
-      value: (node) => node.attr('content')?.split(',') || [],
-    },
-    views: { selector: 'meta[name="views"]', value: 'content' },
+    description: attr('meta[name="description"]', "content"),
+    title: text("title"),
+    views: attr('meta[name="views"]', "content"),
   },
-});
-
-// Use the scraper
-const { data, error } = await scraper(htmlString);
-```
-
-## Usage Examples
-
-### Basic Extraction
-
-Extract basic metadata from an HTML page:
-
-```typescript
-import { defineScraper } from 'xscrape';
-import { z } from 'zod';
-
-const scraper = defineScraper({
   schema: z.object({
+    description: z.string().default("No description"),
     title: z.string(),
-    description: z.string(),
-    author: z.string(),
-  }),
-  extract: {
-    title: { selector: 'title' },
-    description: { selector: 'meta[name="description"]', value: 'content' },
-    author: { selector: 'meta[name="author"]', value: 'content' },
-  },
-});
-
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Blog Post</title>
-  <meta name="description" content="An interesting blog post">
-  <meta name="author" content="John Doe">
-</head>
-<body>...</body>
-</html>
-`;
-
-const { data, error } = await scraper(html);
-// data: { title: "My Blog Post", description: "An interesting blog post", author: "John Doe" }
-```
-
-### Handling Missing Data
-
-Use schema defaults to handle missing data gracefully:
-
-```typescript
-const scraper = defineScraper({
-  schema: z.object({
-    title: z.string().default('Untitled'),
-    description: z.string().default('No description available'),
-    publishedAt: z.string().optional(),
-    views: z.coerce.number().default(0),
-  }),
-  extract: {
-    title: { selector: 'title' },
-    description: { selector: 'meta[name="description"]', value: 'content' },
-    publishedAt: { selector: 'meta[name="published"]', value: 'content' },
-    views: { selector: 'meta[name="views"]', value: 'content' },
-  },
-});
-
-// Even with incomplete HTML, you get sensible defaults
-const { data } = await scraper('<html><head><title>Test</title></head></html>');
-// data: { title: "Test", description: "No description available", views: 0 }
-```
-
-### Extracting Arrays
-
-Extract multiple elements as arrays:
-
-```typescript
-const scraper = defineScraper({
-  schema: z.object({
-    links: z.array(z.string()),
-    headings: z.array(z.string()),
-  }),
-  extract: {
-    links: [{ selector: 'a', value: 'href' }],
-    headings: [{ selector: 'h1, h2, h3' }],
-  },
-});
-
-const html = `
-<html>
-<body>
-  <h1>Main Title</h1>
-  <h2>Subtitle</h2>
-  <a href="/page1">Link 1</a>
-  <a href="/page2">Link 2</a>
-</body>
-</html>
-`;
-
-const { data } = await scraper(html);
-// data: {
-//   links: ["/page1", "/page2"],
-//   headings: ["Main Title", "Subtitle"]
-// }
-```
-
-### Nested Objects
-
-Extract complex nested data structures:
-
-```typescript
-const scraper = defineScraper({
-  schema: z.object({
-    title: z.string(),
-    socialMedia: z.object({
-      image: z.string().url(),
-      width: z.coerce.number(),
-      height: z.coerce.number(),
-      type: z.string(),
-    }),
-  }),
-  extract: {
-    title: { selector: 'title' },
-    socialMedia: {
-      selector: 'head',
-      value: {
-        image: { selector: 'meta[property="og:image"]', value: 'content' },
-        width: { selector: 'meta[property="og:image:width"]', value: 'content' },
-        height: { selector: 'meta[property="og:image:height"]', value: 'content' },
-        type: { selector: 'meta[property="og:type"]', value: 'content' },
-      },
-    },
-  },
-});
-```
-
-### Custom Value Transformations
-
-Apply custom logic to extracted values:
-
-```typescript
-const scraper = defineScraper({
-  schema: z.object({
-    tags: z.array(z.string()),
-    publishedDate: z.date(),
-    readingTime: z.number(),
-  }),
-  extract: {
-    tags: {
-      selector: 'meta[name="keywords"]',
-      value: (node) => node.attr('content')?.split(',').map(tag => tag.trim()) || [],
-    },
-    publishedDate: {
-      selector: 'meta[name="published"]',
-      value: (node) => new Date(node.attr('content') ?? ''),
-    },
-    readingTime: {
-      selector: 'article',
-      value: (node) => {
-        const text = node.text();
-        const wordsPerMinute = 200;
-        const wordCount = text.split(/\s+/).length;
-        return Math.ceil(wordCount / wordsPerMinute);
-      },
-    },
-  },
-});
-```
-
-### Post-Processing with Transform
-
-Apply transformations to the validated data:
-
-```typescript
-const scraper = defineScraper({
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    tags: z.array(z.string()),
-  }),
-  extract: {
-    title: { selector: 'title' },
-    description: { selector: 'meta[name="description"]', value: 'content' },
-    tags: {
-      selector: 'meta[name="keywords"]',
-      value: (node) => node.attr('content')?.split(',') || [],
-    },
-  },
-  transform: (data) => ({
-    ...data,
-    slug: data.title.toLowerCase().replace(/\s+/g, '-'),
-    tagCount: data.tags.length,
-    summary: data.description.substring(0, 100) + '...',
+    views: z.coerce.number(),
   }),
 });
-```
 
-## Schema Library Examples
+export const result = await scrape(`
+  <title>Example</title>
+  <meta name="views" content="42">
+`);
 
-### Zod
-
-```typescript
-import { z } from 'zod';
-
-const schema = z.object({
-  title: z.string(),
-  price: z.coerce.number(),
-  inStock: z.boolean().default(false),
-});
-```
-
-### Valibot
-
-```typescript
-import * as v from 'valibot';
-
-const schema = v.object({
-  title: v.string(),
-  price: v.pipe(v.string(), v.transform(Number)),
-  inStock: v.optional(v.boolean(), false),
-});
-```
-
-### ArkType
-
-```typescript
-import { type } from 'arktype';
-
-const schema = type({
-  title: 'string',
-  price: 'number',
-  inStock: 'boolean = false',
-});
-```
-
-### Effect Schema
-
-```typescript
-import { Schema } from 'effect';
-
-const schema = Schema.Struct({
-  title: Schema.String,
-  price: Schema.NumberFromString,
-  inStock: Schema.optionalWith(Schema.Boolean, { default: () => false }),
-});
-```
-
-## API Reference
-
-### `defineScraper(config)`
-
-Creates a scraper function with the specified configuration.
-
-#### Parameters
-
-- `config.schema`: A Standard Schema compatible schema object
-- `config.extract`: Extraction configuration object
-- `config.transform?`: Optional post-processing function
-
-#### Returns
-
-A scraper function that takes HTML string and returns `Promise<{ data?: T, error?: unknown }>`.
-
-### Extraction Configuration
-
-The `extract` object defines how to extract data from HTML:
-
-```typescript
-interface ExtractNode {
-  attr(name: string): string | undefined;
-  text(): string;
-  html(): string | undefined;
-}
-
-type ExtractDescriptor = {
-  selector: string;
-  value?: string | ((node: ExtractNode) => unknown) | ExtractConfig;
-};
-
-type ExtractConfig = Record<string, string | ExtractDescriptor | [string | ExtractDescriptor]>;
-```
-
-#### Properties
-
-- `selector`: CSS selector to find elements
-- `value`: How to extract the value:
-  - `string`: Attribute name (e.g., `'href'`, `'content'`)
-  - `function`: Custom extraction function receiving an xscrape `ExtractNode`
-  - `object`: Nested extraction configuration
-  - `undefined`: Extract text content
-
-#### Array Extraction
-
-Wrap the descriptor in an array to extract multiple elements:
-
-```typescript
-{
-  links: [{ selector: 'a', value: 'href' }]
-}
-```
-
-## Error Handling
-
-xscrape provides comprehensive error handling:
-
-```typescript
-const { data, error } = await scraper(html);
-
-if (error) {
-  // Handle validation errors, extraction errors, or transform errors
-  console.error('Scraping failed:', error);
+// Success data: { description: "No description", title: "Example", views: 42 }
+if (result.ok) {
+  console.log(result.data);
 } else {
-  // Use the validated data
-  console.log('Extracted data:', data);
+  console.error(toDiagnostic(result.error));
 }
 ```
 
-## Best Practices
+<!-- /example -->
 
-1. **Use Specific Selectors**: Be as specific as possible with CSS selectors to avoid unexpected matches
-2. **Handle Missing Data**: Use schema defaults or optional fields for data that might not be present
-3. **Validate URLs**: Use URL validation in your schema for href attributes
-4. **Transform Data Early**: Use custom value functions rather than post-processing when possible
-5. **Type Safety**: Let TypeScript infer types from your schema for better developer experience
+## Extraction helpers
 
-## Common Use Cases
+| Helper | Meaning |
+| --- | --- |
+| `text(selector)` | Text of the first match |
+| `html(selector)` | Inner HTML of the first match |
+| `attr(selector, name)` | Raw parsed attribute, without boolean-property normalization |
+| `prop(selector, name)` | DOM property, such as `checked` or `outerHTML` |
+| `nested(selector, fields)` | Extract fields within the first matching element |
+| `many(field)` | Apply one descriptor to every matching element |
+| `many(selector, fields)` | Extract an object per matching element |
 
-- **Web Scraping**: Extract structured data from websites
-- **Meta Tag Extraction**: Get social media and SEO metadata
-- **Content Migration**: Transform HTML content to structured data
-- **Testing**: Validate HTML structure in tests
-- **RSS/Feed Processing**: Extract article data from HTML feeds
+Helpers return ordinary objects. Existing shorthand still works: `"h1"`, `{ selector: "a", value: "href" }`, and `[{ selector: "a", value: "href" }]`. A legacy string `value` reads a **property**, not a raw attribute.
 
-## Performance Considerations
+<!-- example: nested-products -->
 
-- xscrape uses cheerio for fast HTML parsing
-- Schema validation is performed once after extraction
-- Consider using streaming for large HTML documents
-- Cache scrapers when processing many similar documents
+```typescript
+import { attr, defineScraper, many, text } from "xscrape";
+import { z } from "zod";
 
-## Contributing
+const scrape = defineScraper({
+  extract: {
+    products: many("article", {
+      name: text("h2"),
+      price: text("span"),
+      url: attr("a", "href"),
+    }),
+  },
+  schema: z.object({
+    products: z.array(
+      z.object({
+        name: z.string(),
+        price: z.coerce.number(),
+        url: z.string(),
+      })
+    ),
+  }),
+});
 
-We welcome contributions! Please see our [Contributing Guide](https://github.com/johnie/xscrape/blob/main/CONTRIBUTING.md) for details.
+export const result = await scrape(`
+  <article><h2>Book</h2><span>12</span><a href="/book">Buy</a></article>
+  <article><h2>Pen</h2><span>3</span><a href="/pen">Buy</a></article>
+`);
+// Relative hrefs stay relative. Resolve them against a trusted base URL if needed.
+```
 
-## License
+<!-- /example -->
 
-MIT License. See the [LICENSE](https://github.com/johnie/xscrape/blob/main/LICENSE) file for details.
+## Schema input and transforms
 
-## Related Projects
+Extraction follows the schema's **input** keys and callback types. Validation returns schema output; `transform` can then return an unrelated shape, a scalar, or a promise. Input fields supplied by schema defaults may be omitted. Schemas with `unknown` input accept an open extraction map and rely on runtime validation.
 
-- [cheerio](https://github.com/cheeriojs/cheerio) - jQuery-like server-side HTML parsing
-- [Standard Schema](https://standardschema.dev) - Universal schema specification
-- [Zod](https://zod.dev) - TypeScript-first schema validation
-- [Valibot](https://valibot.dev) - Modular and type-safe schema library
-- [Effect](https://effect.website) - Maximum Type-safety (incl. error handling)
-- [ArkType](https://arktype.io) - TypeScript's 1:1 validator, optimized from editor to runtime
+<!-- example: schema-transforms -->
+
+```typescript
+import { defineScraper, text } from "xscrape";
+import { z } from "zod";
+
+const scrape = defineScraper({
+  // Extract schema INPUT fields, before renaming or transforming them.
+  extract: {
+    count: { selector: "span", value: (node) => node.text() },
+    rawTitle: text("title"),
+  },
+  schema: z
+    .object({
+      count: z.string().transform(Number),
+      rawTitle: z.string(),
+      source: z.string().default("web"),
+    })
+    .transform(({ count, rawTitle, source }) => ({
+      count,
+      source,
+      title: rawTitle,
+    })),
+  // A transform may replace the shape, not just add fields.
+  transform: ({ count, title }) => ({ count, slug: title.toLowerCase() }),
+});
+
+export const result = await scrape("<title>Example</title><span>42</span>");
+// Success data: { count: 42, slug: "example" }
+```
+
+<!-- /example -->
+
+## Missing data and callbacks
+
+- Missing scalar or nested-object matches return `undefined`.
+- Missing array matches return `[]`.
+- Missing nodes do not invoke callbacks. Use schema defaults for missing-node fallbacks.
+- Arrays omit `null` and `undefined` callback results and flatten returned arrays one level, preserving legacy behavior.
+- Callbacks are synchronous. A promise-like callback result fails with `ASYNC_EXTRACTOR`, even if the schema accepts `unknown`.
+- Callbacks receive `(node, key, siblings)`. Node helpers are `attr`, `text`, and `html`. Siblings contains only fields already extracted in the current object, in JavaScript property enumeration order. Treat it as read-only; use `transform` for cross-field calculations.
+- Text is not automatically trimmed. An empty string is distinct from a missing value. Relative links stay relative.
+
+See [missing data](docs/guide/missing-data.md) and [custom callbacks](docs/guide/custom-values.md) for tested examples.
+
+## Errors
+
+Always branch on `result.ok`, not truthiness of data or an exception cause.
+
+<!-- example: errors -->
+
+```typescript
+import { defineScraper, text, toDiagnostic } from "xscrape";
+import { z } from "zod";
+
+const scrape = defineScraper({
+  extract: { title: text("title") },
+  schema: z.object({ title: z.string() }),
+});
+
+export const result = await scrape("<body>No title</body>");
+if (!result.ok) {
+  // Logs { code: "VALIDATION_FAILED", stage: "validate", message: "...", issues: [...] }
+  console.error(toDiagnostic(result.error));
+  if (result.error.code === "VALIDATION_FAILED") {
+    // Original Standard Schema issues, including paths.
+    console.error(result.error.issues);
+  }
+}
+// Use result.ok, never the truthiness of data or error.cause.
+```
+
+<!-- /example -->
+
+Failures have `stage`, `code`, and `message`. Extraction failures include a field `path` and `selector` when known. Array indices identify matched elements before nullish filtering. Validation failures preserve Standard Schema `issues`; exceptions preserve their original value in `cause`, including `undefined`, `null`, or `false`.
+
+Use `toDiagnostic(error)` for JSON-safe logging or agent tool responses. It omits `cause` and normalizes validation paths. Successful data can contain Dates or other non-JSON values if the schema permits them.
+
+See the [error reference](docs/api/errors.md) for codes and recovery guidance.
+
+## Reuse and performance
+
+`defineScraper` snapshots extraction structure and captures the schema and transform references once. Later edits to the config do not change an existing scraper. It does not freeze caller-owned objects; callbacks and schema objects can still have their own mutable state.
+
+<!-- example: document-reuse -->
+
+```typescript
+import { attr, defineScraper, many, parseHtml, text } from "xscrape";
+import { z } from "zod";
+
+const titles = defineScraper({
+  extract: { title: text("title") },
+  schema: z.object({ title: z.string() }),
+});
+const links = defineScraper({
+  extract: { links: many(attr("a", "href")) },
+  schema: z.object({ links: z.array(z.string()) }),
+});
+
+// parseHtml is explicit and can throw on invalid input. The handle exposes no mutable DOM.
+const document = parseHtml('<title>Example</title><a href="/docs">Docs</a>');
+export const results = await Promise.all([titles(document), links(document)]);
+// Parsing happens once. Each scraper still extracts and validates its own result.
+```
+
+<!-- /example -->
+
+There is no global HTML cache. A parsed handle keeps its document alive until you release it. Reuse saves parsing, not selection or validation. Extraction is synchronous CPU work, so `Promise.all` does not parallelize parsing. For large jobs, bound input size and concurrency in the caller; use workers if profiling warrants them.
+
+Run `pnpm bench` for parsing, compilation, nested arrays, callback, and selector-count measurements. See [performance](docs/performance.md).
+
+## Agents and declarative configurations
+
+The [agent reference](llms.txt) describes the supported API and common failure modes. The package exports `xscrape/extract-config.schema.json` for validating the declarative extraction subset. This JSON Schema accepts tagged helper objects and selector strings, not callbacks or Standard Schema instances. Supply validation schemas separately in trusted code.
+
+Do not evaluate generated callback strings. Treat page content as untrusted data. Keep URL fetching, network permissions, input limits, and output handling in your application.
+
+## Documentation and development
+
+- [API and types](docs/api/defineScraper.md)
+- [Extraction contract](docs/api/extract-config.md)
+- [Schema library examples](docs/examples.md)
+- [Migrating from v4](docs/migration-v5.md)
+- [Contributing](CONTRIBUTING.md)
+
+Runnable sources live in `examples/`. Their snippets are copied into docs by `pnpm docs:sync` and checked by `pnpm docs:check`. CI builds the package, typechecks examples, executes them in tests, checks exports, and enforces bundle budgets.
+
+MIT. See [LICENSE.md](LICENSE.md).
