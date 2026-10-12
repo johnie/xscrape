@@ -69,26 +69,26 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
-    "@size-limit/preset-small-lib": "^14.1.0",
-    "@types/node": "^26.6.3",
-    "arktype": "^2.2.5",
+    "@size-limit/preset-small-lib": "^14.2.0",
+    "@types/node": "^26.6.5",
+    "arktype": "^2.2.8",
     "domhandler": "^6.0.1",
-    "effect": "^3.22.2",
-    "lefthook": "^2.1.14",
-    "oxfmt": "^0.70.0",
-    "oxlint": "^1.85.0",
-    "publint": "^0.3.24",
-    "size-limit": "^14.1.0",
-    "tsdown": "^0.23.0",
+    "effect": "^4.0.3",
+    "lefthook": "^2.2.1",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "publint": "^0.3.25",
+    "size-limit": "^14.2.0",
+    "tsdown": "^0.23.1",
     "typescript": "^7.0.2",
-    "ultracite": "7.12.1",
+    "ultracite": "8.0.0",
     "valibot": "^1.5.0",
-    "vite": "^8.3.1",
-    "vitest": "^5.0.2",
-    "zod": "^4.6.5"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3",
+    "zod": "^4.6.6"
   },
   "engines": {
     "node": ">=22.12.0"
   },
-  "packageManager": "pnpm@11.7.0"
+  "packageManager": "pnpm@12.11.2"
 }

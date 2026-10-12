@@ -1,5 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import {
@@ -33,7 +33,7 @@ const invalidSchema = (validate: () => unknown): StandardSchemaV1 => ({
 });
 
 describe("extraction contract", () => {
-  test("helpers return ordinary serializable descriptors", () => {
+  it("helpers return ordinary serializable descriptors", () => {
     const fields = {
       products: many("article", { name: text("h2"), url: attr("a", "href") }),
     };
@@ -53,7 +53,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("extracts nested arrays, text, markup, attributes and properties", async () => {
+  it("extracts nested arrays, text, markup, attributes and properties", async () => {
     const scrape = defineScraper({
       extract: {
         checkedAttribute: attr("input", "checked"),
@@ -84,7 +84,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("preserves legacy property reads and array shorthand", async () => {
+  it("preserves legacy property reads and array shorthand", async () => {
     const scrape = defineScraper({
       extract: {
         checked: { selector: "input", value: "checked" },
@@ -98,7 +98,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("missing nodes skip callbacks and distinguish scalar from array results", async () => {
+  it("missing nodes skip callbacks and distinguish scalar from array results", async () => {
     const callback = vi.fn<() => string>(() => "fallback");
     const scrape = defineScraper({
       extract: {
@@ -115,7 +115,7 @@ describe("extraction contract", () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  test("arrays filter nullish callback results and flatten one level", async () => {
+  it("arrays filter nullish callback results and flatten one level", async () => {
     const scrape = defineScraper({
       extract: {
         flattened: [{ selector: "h2", value: (node) => [node.text(), null] }],
@@ -134,7 +134,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("callbacks see only preceding siblings, with their original key", async () => {
+  it("callbacks see only preceding siblings, with their original key", async () => {
     const scrape = defineScraper({
       extract: {
         first: text("h2"),
@@ -158,7 +158,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("allows non-JSON values until schema validation", async () => {
+  it("allows non-JSON values until schema validation", async () => {
     const date = new Date("2026-01-01");
     const scrape = defineScraper({
       extract: { date: { selector: "title", value: () => date } },
@@ -170,7 +170,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("snapshots nested config without freezing caller-owned objects", async () => {
+  it("snapshots nested config without freezing caller-owned objects", async () => {
     const fields = { title: { selector: "h2" } };
     const extract = { first: nested("article", fields) };
     const scrape = defineScraper({ extract, schema: recordSchema });
@@ -182,7 +182,7 @@ describe("extraction contract", () => {
     expect(fields.title.selector).toBe("a");
   });
 
-  test("supports shared config objects but rejects actual cycles", async () => {
+  it("supports shared config objects but rejects actual cycles", async () => {
     const fields = { title: text("h2") };
     const shared = defineScraper({
       extract: { a: nested("article", fields), b: nested("article", fields) },
@@ -198,7 +198,7 @@ describe("extraction contract", () => {
     });
   });
 
-  test("treats __proto__ as an own data key", async () => {
+  it("treats __proto__ as an own data key", async () => {
     const schema: StandardSchemaV1 = {
       "~standard": {
         validate: (value) => ({ value }),
@@ -220,7 +220,7 @@ describe("extraction contract", () => {
 });
 
 describe("pipeline and diagnostics", () => {
-  test("uses schema input keys and permits omitted defaulted fields", async () => {
+  it("uses schema input keys and permits omitted defaulted fields", async () => {
     const scrape = defineScraper({
       extract: { raw: text("title") },
       schema: z
@@ -234,7 +234,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test("supports unknown preprocessing inputs", async () => {
+  it("supports unknown preprocessing inputs", async () => {
     const scrape = defineScraper({
       extract: { title: text("title") },
       schema: z.preprocess((value) => value, z.object({ title: z.string() })),
@@ -245,7 +245,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test("awaits asynchronous schemas before transforming", async () => {
+  it("awaits asynchronous schemas before transforming", async () => {
     const order: string[] = [];
     const schema: StandardSchemaV1<unknown, string> = {
       "~standard": {
@@ -270,7 +270,7 @@ describe("pipeline and diagnostics", () => {
     expect(order).toStrictEqual(["validate", "transform"]);
   });
 
-  test("does not transform invalid data", async () => {
+  it("does not transform invalid data", async () => {
     const transform = vi.fn<() => void>();
     const scrape = defineScraper({
       extract: { title: ".missing" },
@@ -284,7 +284,7 @@ describe("pipeline and diagnostics", () => {
     expect(transform).not.toHaveBeenCalled();
   });
 
-  test.each([undefined, null, false, 0, "", new Error("failed")])(
+  it.each([undefined, null, false, 0, "", new Error("failed")])(
     "preserves arbitrary thrown causes: %s",
     async (cause) => {
       const scrape = defineScraper({
@@ -303,7 +303,7 @@ describe("pipeline and diagnostics", () => {
     }
   );
 
-  test("allows undefined as a successful transform result", async () => {
+  it("allows undefined as a successful transform result", async () => {
     const scrape = defineScraper({
       extract: {},
       schema: recordSchema,
@@ -315,7 +315,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test.each([null, undefined, {}])(
+  it.each([null, undefined, {}])(
     "reports malformed validator results: %s",
     async (value) => {
       const scrape = defineScraper({
@@ -329,7 +329,7 @@ describe("pipeline and diagnostics", () => {
     }
   );
 
-  test("distinguishes validator exceptions from validation issues", async () => {
+  it("distinguishes validator exceptions from validation issues", async () => {
     const scrape = defineScraper({
       extract: {},
       schema: invalidSchema(() => {
@@ -346,7 +346,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test("reports invalid selectors with nested paths", async () => {
+  it("reports invalid selectors with nested paths", async () => {
     const scrape = defineScraper({
       extract: { products: many("article", { title: text("[") }) },
       schema: recordSchema,
@@ -361,7 +361,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test("reports callback exceptions at the matched array index", async () => {
+  it("reports callback exceptions at the matched array index", async () => {
     const scrape = defineScraper({
       extract: {
         titles: many({
@@ -382,7 +382,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test.each([false, true])(
+  it.each([false, true])(
     "rejects async callbacks, including rejected promises: %s",
     async (reject) => {
       const scrape = defineScraper({
@@ -407,7 +407,7 @@ describe("pipeline and diagnostics", () => {
     }
   );
 
-  test.each([
+  it.each([
     null,
     [],
     { title: [] },
@@ -421,7 +421,7 @@ describe("pipeline and diagnostics", () => {
     });
   });
 
-  test("diagnostics omit nonserializable causes and normalize issue paths", () => {
+  it("diagnostics omit nonserializable causes and normalize issue paths", () => {
     const cause = new Map();
     cause.set("self", cause);
     const encoded = JSON.stringify(
@@ -456,7 +456,7 @@ describe("pipeline and diagnostics", () => {
 });
 
 describe("parsed document reuse", () => {
-  test("reuses a private document across independent scrapers", async () => {
+  it("reuses a private document across independent scrapers", async () => {
     const document = parseHtml(page);
     const titles = defineScraper({
       extract: { titles: many("h2") },
@@ -471,7 +471,7 @@ describe("parsed document reuse", () => {
     expect(Object.isFrozen(document)).toBeTruthy();
   });
 
-  test("overlapping calls never share the current document", async () => {
+  it("overlapping calls never share the current document", async () => {
     const scrape = defineScraper({
       extract: { title: text("title") },
       schema: z.object({ title: z.string() }),
@@ -493,7 +493,7 @@ describe("parsed document reuse", () => {
     ]);
   });
 
-  test("rejects forged parsed document handles", async () => {
+  it("rejects forged parsed document handles", async () => {
     const scrape = defineScraper({ extract: {}, schema: recordSchema });
     // SAFETY: Tests an untyped caller forging an opaque handle.
     await expect(scrape({} as ParsedHtml)).resolves.toMatchObject({

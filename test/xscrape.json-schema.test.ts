@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { attr, defineScraper, html, many, nested, prop, text } from "@/index";
@@ -11,7 +11,7 @@ const configSchema = z.fromJSONSchema(
 );
 
 describe("declarative JSON schema", () => {
-  test("accepts every declarative helper and nested arrays", async () => {
+  it("accepts every declarative helper and nested arrays", async () => {
     const config = {
       attributes: many(attr("a", "href")),
       checked: prop("input", "checked"),
@@ -35,7 +35,7 @@ describe("declarative JSON schema", () => {
     });
   });
 
-  test.each([
+  it.each([
     { title: { kind: "text", selecter: "h1" } },
     { title: { kind: "attr", selector: "h1" } },
     { title: { field: { field: "h1", kind: "many" }, kind: "many" } },

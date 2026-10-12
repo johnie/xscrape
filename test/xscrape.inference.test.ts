@@ -1,11 +1,11 @@
-import { describe, expectTypeOf, test } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 import { z } from "zod";
 
 import { attr, defineScraper, many, nested, text } from "@/index";
 import type { ExtractConfig, Scraper, ScraperConfig } from "@/index";
 
 describe("xscrape inference", () => {
-  test("extraction follows schema input, including renamed fields and callbacks", () => {
+  it("extraction follows schema input, including renamed fields and callbacks", () => {
     const schema = z
       .object({
         count: z.string().transform(Number),
@@ -29,7 +29,7 @@ describe("xscrape inference", () => {
     >();
   });
 
-  test("independent synchronous and asynchronous transform outputs are inferred", () => {
+  it("independent synchronous and asynchronous transform outputs are inferred", () => {
     const config = {
       extract: { title: text("title") },
       schema: z.object({ title: z.string() }),
@@ -54,7 +54,7 @@ describe("xscrape inference", () => {
     expectTypeOf(nothing).toEqualTypeOf<Scraper<undefined>>();
   });
 
-  test("optional transform configs return the honest union of possible outputs", () => {
+  it("optional transform configs return the honest union of possible outputs", () => {
     const schema = z.object({ title: z.string() });
     const config: ScraperConfig<typeof schema, number> = {
       extract: { title: "title" },
@@ -64,7 +64,7 @@ describe("xscrape inference", () => {
     expectTypeOf(scrape).toEqualTypeOf<Scraper<{ title: string } | number>>();
   });
 
-  test("explicit generics cannot claim a transform result without a transform", () => {
+  it("explicit generics cannot claim a transform result without a transform", () => {
     const schema = z.object({ title: z.string() });
     const scrape = defineScraper<typeof schema, number>({
       extract: { title: "title" },
@@ -73,7 +73,7 @@ describe("xscrape inference", () => {
     expectTypeOf(scrape).toEqualTypeOf<Scraper<{ title: string } | number>>();
   });
 
-  test("helpers support readonly arrays, optional nested inputs, and coercion", () => {
+  it("helpers support readonly arrays, optional nested inputs, and coercion", () => {
     const schema = z.object({
       image: z.object({ url: z.string() }).optional(),
       links: z.array(z.string()).readonly(),
@@ -92,7 +92,7 @@ describe("xscrape inference", () => {
     expectTypeOf(scrape).toEqualTypeOf<Scraper<z.output<typeof schema>>>();
   });
 
-  test("unknown preprocess input accepts an open extraction map", () => {
+  it("unknown preprocess input accepts an open extraction map", () => {
     const schema = z.preprocess(
       (value) => value,
       z.object({ title: z.string() })
@@ -101,7 +101,7 @@ describe("xscrape inference", () => {
     expectTypeOf(scrape).toEqualTypeOf<Scraper<{ title: string }>>();
   });
 
-  test("known input shapes reject typos, missing required fields and incorrect callback values", () => {
+  it("known input shapes reject typos, missing required fields and incorrect callback values", () => {
     // @ts-expect-error missing a required schema input field
     const missing: ExtractConfig<{ title: string }> = {};
     // @ts-expect-error misspelled input key
@@ -131,7 +131,7 @@ describe("xscrape inference", () => {
     expectTypeOf(asyncCallback).toBeObject();
   });
 
-  test("success and failure narrow without inspecting arbitrary values", async () => {
+  it("success and failure narrow without inspecting arbitrary values", async () => {
     const scrape = defineScraper({
       extract: { title: "title" },
       schema: z.object({ title: z.string() }),

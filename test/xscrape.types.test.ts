@@ -1,9 +1,9 @@
-import { describe, expectTypeOf, test } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 
 import type { ExtractConfig } from "@/index";
 
 describe("xscrape types", () => {
-  test("extract configs allow owned scalar, nested, array, and callback forms", () => {
+  it("extract configs allow owned scalar, nested, array, and callback forms", () => {
     const extract = {
       image: {
         selector: "head",
@@ -35,7 +35,7 @@ describe("xscrape types", () => {
     expectTypeOf(extract.links).toBeArray();
   });
 
-  test("extract callbacks expose xscrape node helpers instead of raw dom internals", () => {
+  it("extract callbacks expose xscrape node helpers instead of raw dom internals", () => {
     const extract = {
       title: {
         selector: "title",

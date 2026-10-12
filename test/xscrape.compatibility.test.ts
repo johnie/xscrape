@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { defineScraper } from "@/index";
 
@@ -6,7 +6,7 @@ import { compatibilityCases } from "../examples/schemas";
 import { kitchenSink } from "./__fixtures__/html";
 
 describe("xscrape standard-schema compatibility", () => {
-  test.each(compatibilityCases)(
+  it.each(compatibilityCases)(
     "extracts required data with $name",
     async ({ schema }) => {
       const scraper = defineScraper({
@@ -23,7 +23,7 @@ describe("xscrape standard-schema compatibility", () => {
     }
   );
 
-  test.each(compatibilityCases)(
+  it.each(compatibilityCases)(
     "surfaces validation errors with $name",
     async ({ schema }) => {
       const scraper = defineScraper({

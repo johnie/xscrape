@@ -1,5 +1,11 @@
 # xscrape
 
+## Unreleased
+
+- Upgrade all dependencies to their latest stable releases, including Effect 4 and Ultracite 8, and refresh the pnpm lockfile.
+- Pin the development and release runtime to Node.js 24.21.0 and the package manager to pnpm 12.11.2. CI retains Node.js 22 coverage alongside the pinned Node.js 24 release.
+- Migrate the Effect Schema example to `Schema.toStandardSchemaV1` and benchmarks to Vitest 5's test-context fixture API. Adopt the updated lint preset's consistent test naming.
+
 ## 4.0.0
 
 ### Major Changes
