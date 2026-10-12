@@ -1,5 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { defineScraper } from "@/index";
 
@@ -48,7 +48,7 @@ const missingValueSchema = <T extends object>(): StandardSchemaV1<T, T> => ({
 });
 
 describe("xscrape runtime boundary", () => {
-  test("extracts metadata, text, and computed reading time", async () => {
+  it("extracts metadata, text, and computed reading time", async () => {
     const scraper = defineScraper({
       extract: {
         description: {
@@ -101,7 +101,7 @@ describe("xscrape runtime boundary", () => {
     expect(data?.readingTime).toBeGreaterThan(20);
   });
 
-  test("extracts arrays, nested structures, and raw markup", async () => {
+  it("extracts arrays, nested structures, and raw markup", async () => {
     const scraper = defineScraper({
       extract: {
         headings: [{ selector: "h2" }],
@@ -147,7 +147,7 @@ describe("xscrape runtime boundary", () => {
     expect(data?.markup).toContain('<meta name="description"');
   });
 
-  test("extracts arrays with attribute shorthands", async () => {
+  it("extracts arrays with attribute shorthands", async () => {
     const scraper = defineScraper({
       extract: {
         links: [{ selector: "a", value: "href" }],
@@ -169,7 +169,7 @@ describe("xscrape runtime boundary", () => {
     });
   });
 
-  test("applies async transforms after validation", async () => {
+  it("applies async transforms after validation", async () => {
     const scraper = defineScraper({
       extract: {
         title: { selector: "title" },
@@ -191,7 +191,7 @@ describe("xscrape runtime boundary", () => {
     expect(data).toStrictEqual({ title: "EXAMPLE TITLE" });
   });
 
-  test("returns validation issues without leaking runtime internals", async () => {
+  it("returns validation issues without leaking runtime internals", async () => {
     const issues = [{ message: "title is required", path: ["title"] }] as const;
     const scraper = defineScraper({
       extract: {
@@ -211,7 +211,7 @@ describe("xscrape runtime boundary", () => {
     });
   });
 
-  test("returns transform errors as scraper errors", async () => {
+  it("returns transform errors as scraper errors", async () => {
     const scraper = defineScraper({
       extract: {
         title: { selector: "title" },
@@ -234,7 +234,7 @@ describe("xscrape runtime boundary", () => {
     });
   });
 
-  test("guards against validators that succeed without a value", async () => {
+  it("guards against validators that succeed without a value", async () => {
     const scraper = defineScraper({
       extract: {
         title: { selector: "title" },
@@ -254,7 +254,7 @@ describe("xscrape runtime boundary", () => {
     });
   });
 
-  test("reuses the same scraper across multiple calls", async () => {
+  it("reuses the same scraper across multiple calls", async () => {
     const scraper = defineScraper({
       extract: {
         title: { selector: "title" },

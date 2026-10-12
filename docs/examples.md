@@ -18,7 +18,7 @@ export const compatibilityCases = [
   { name: "Arktype", schema: type({ title: "string" }) },
   {
     name: "Effect Schema",
-    schema: Schema.standardSchemaV1(Schema.Struct({ title: Schema.String })),
+    schema: Schema.toStandardSchemaV1(Schema.Struct({ title: Schema.String })),
   },
 ] satisfies { name: string; schema: StandardSchemaV1 }[];
 ```

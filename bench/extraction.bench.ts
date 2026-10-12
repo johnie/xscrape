@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { bench, describe } from "vitest";
+import { test } from "vitest";
 import { z } from "zod";
 
 import { attr, defineScraper, many, parseHtml, text } from "@/index";
@@ -23,44 +23,29 @@ for (const rows of [10, 200, 2000]) {
   const scrape = defineScraper({ extract, schema });
   const document = parseHtml(markup);
 
-  describe(`${rows} rows, ${Buffer.byteLength(markup)} bytes, nested arrays and callbacks`, () => {
-    bench(
-      "parse only",
-      () => {
+  test(`${rows} rows, ${Buffer.byteLength(markup)} bytes, nested arrays and callbacks`, async ({
+    bench,
+  }) => {
+    await bench.compare(
+      bench("parse only", () => {
         parseHtml(markup);
-      },
-      options
-    );
-    bench(
-      "compile only",
-      () => {
+      }),
+      bench("compile only", () => {
         defineScraper({ extract, schema });
-      },
-      options
-    );
-    bench(
-      "extract and validate a reused document",
-      async () => {
+      }),
+      bench("extract and validate a reused document", async () => {
         const result = await scrape(document);
         if (!result.ok) {
           throw new Error(result.error.message);
         }
-      },
-      options
-    );
-    bench(
-      "parse, extract and validate",
-      async () => {
+      }),
+      bench("parse, extract and validate", async () => {
         const result = await scrape(markup);
         if (!result.ok) {
           throw new Error(result.error.message);
         }
-      },
-      options
-    );
-    bench(
-      "Cheerio parse and equivalent extraction, no validation",
-      () => {
+      }),
+      bench("Cheerio parse and equivalent extraction, no validation", () => {
         const $ = load(markup);
         $.extract({
           products: [
@@ -78,7 +63,7 @@ for (const rows of [10, 200, 2000]) {
           ],
           title: "title",
         });
-      },
+      }),
       options
     );
   });
@@ -94,16 +79,12 @@ for (const fieldCount of [1, 10, 50]) {
   );
   const scrape = defineScraper({ extract, schema });
   const document = parseHtml(markup);
-  describe(`${fieldCount} scalar selectors`, () => {
-    bench(
-      "reused document",
-      async () => {
-        const result = await scrape(document);
-        if (!result.ok) {
-          throw new Error(result.error.message);
-        }
-      },
-      options
-    );
+  test(`${fieldCount} scalar selectors`, async ({ bench }) => {
+    await bench("reused document", async () => {
+      const result = await scrape(document);
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+    }).run(options);
   });
 }

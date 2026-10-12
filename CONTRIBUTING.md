@@ -16,6 +16,13 @@ Thank you for your interest in contributing to `xscrape`! We appreciate your hel
 
 ## Development Environment Setup
 
+Use Node.js **24.21.0** (pinned in `.nvmrc`) and pnpm **12.11.2** (pinned in `package.json`). Activate the Node version with your version manager, then install the matching pnpm release:
+
+```bash
+fnm use
+npm install --global pnpm@12.11.2
+```
+
 1. **Clone the Repository**: Clone the repository from GitHub.
    ```bash
    git clone https://github.com/johnie/xscrape.git

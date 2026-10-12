@@ -1,8 +1,8 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 // Import examples inside tests so their user-facing logs can be observed without cluttering test output.
 describe("published examples", () => {
-  test("quick start", async () => {
+  it("quick start", async () => {
     using log = vi.spyOn(console, "log").mockImplementation(() => {});
     const { result } = await import("../examples/quick-start");
     expect(result).toStrictEqual({
@@ -12,7 +12,7 @@ describe("published examples", () => {
     expect(log).toHaveBeenCalledOnce();
   });
 
-  test("schema transformations", async () => {
+  it("schema transformations", async () => {
     const { result } = await import("../examples/schema-transforms");
     expect(result).toStrictEqual({
       data: { count: 42, slug: "example" },
@@ -20,7 +20,7 @@ describe("published examples", () => {
     });
   });
 
-  test("nested products", async () => {
+  it("nested products", async () => {
     const { result } = await import("../examples/nested-products");
     expect(result).toStrictEqual({
       data: {
@@ -33,7 +33,7 @@ describe("published examples", () => {
     });
   });
 
-  test("custom callbacks", async () => {
+  it("custom callbacks", async () => {
     const { result } = await import("../examples/custom-values");
     expect(result).toStrictEqual({
       data: { published: new Date("2026-01-01"), tags: ["html", "typescript"] },
@@ -41,7 +41,7 @@ describe("published examples", () => {
     });
   });
 
-  test("missing data", async () => {
+  it("missing data", async () => {
     const { result } = await import("../examples/missing-data");
     expect(result).toStrictEqual({
       data: { author: undefined, links: [], source: "web", title: "Untitled" },
@@ -49,7 +49,7 @@ describe("published examples", () => {
     });
   });
 
-  test("document reuse", async () => {
+  it("document reuse", async () => {
     const { results } = await import("../examples/document-reuse");
     expect(results).toStrictEqual([
       { data: { title: "Example" }, ok: true },
@@ -57,7 +57,7 @@ describe("published examples", () => {
     ]);
   });
 
-  test("structured failures", async () => {
+  it("structured failures", async () => {
     using log = vi.spyOn(console, "error").mockImplementation(() => {});
     const { result } = await import("../examples/errors");
     expect(result).toMatchObject({
